@@ -1,16 +1,40 @@
 // background.js
 
-const GEMINI_MODEL = "gemini-2.5-flash"; // 또는 gemini-2.5-pro
-
 chrome.commands.onCommand.addListener(async (command) => {
     if (command === "capture_and_query") {
         try {
             const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tabs.length === 0) return;
 
-            if (tabs.length > 0) {
-                const tab = tabs[0];
-                await captureAndProcess(tab.windowId);
+            const tab = tabs[0];
+
+            // 캡처 실행 (결과를 dataUrl로 받음)
+            const dataUrl = await captureAndProcess(tab.windowId);
+            if (!dataUrl) {
+                console.error("[ERROR] Capture failed, stopping.");
+                return;
             }
+
+            // Gemini 쿼리 실행 (결과를 geminiText로 받음)
+            const geminiText = await queryGeminiWithImage(dataUrl);
+            if (!geminiText) {
+                console.error("[ERROR] Gemini query failed, stopping.");
+                return;
+            }
+
+            // content.js 스크립트를 현재 탭에 주입
+            // (이미 주입되었다면 이 코드는 무시됨)
+            await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['content.js']
+            });
+
+            // content.js로 응답 텍스트를 메시지로 전송
+            chrome.tabs.sendMessage(tab.id, {
+                type: "displayResult",
+                text: geminiText
+            });
+
         } catch (error) {
             console.error("[ERROR] While executing command:", error);
         }
@@ -20,20 +44,23 @@ chrome.commands.onCommand.addListener(async (command) => {
 async function captureAndProcess(windowId) {
     try {
         const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: "jpeg" });
+        console.log("[INFO] Captured image (Data URL):", dataUrl);
 
-        console.log("[INFO] Captured image (Data URL):", dataUrl.substring(0, 50) + "...");
-
-        await queryGeminiWithImage(dataUrl);
-
+        return dataUrl; // 캡처 데이터를 반환
     } catch (error) {
         console.error("[ERROR] Capture and process failed:", error);
+
+        return null; // 실패 시 null 반환
     }
 }
 
 async function queryGeminiWithImage(dataUrl) {
-    // chrome.storage에서 API 키 가져오기
-    const result = await chrome.storage.local.get(['geminiApiKey']);
-    const GEMINI_API_KEY = result.geminiApiKey;
+    // API 키와 모델 이름을 함께 가져오기
+    const storageData = await chrome.storage.local.get(['geminiApiKey', 'geminiModel']);
+    const GEMINI_API_KEY = storageData.geminiApiKey;
+
+    // 저장된 모델 이름을 사용하고, 없으면 기본값(flash)을 사용합니다.
+    const GEMINI_MODEL = storageData.geminiModel || 'gemini-2.5-flash';
 
     // 키가 저장되어 있는지 확인
     if (!GEMINI_API_KEY) {
@@ -49,7 +76,7 @@ async function queryGeminiWithImage(dataUrl) {
 
         // 옵션 페이지 열기
         chrome.runtime.openOptionsPage();
-        return; // API 호출 중단
+        return null; // API 호출 중단
     }
 
     // Data URL에서 Base64 데이터와 MIME 타입 추출
@@ -81,9 +108,7 @@ async function queryGeminiWithImage(dataUrl) {
             `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
             }
         );
@@ -92,23 +117,16 @@ async function queryGeminiWithImage(dataUrl) {
 
         if (!response.ok) {
             console.error("[ERROR] Gemini API error:", result);
-            return;
+            return `Error: ${result.error?.message || 'API call failed'}`; // 에러 메시지를 반환
         }
 
         const geminiText = result.candidates[0].content.parts[0].text;
         console.log("[INFO] Gemini response:", geminiText);
 
-        // 고유한 ID로 알림을 생성 (ID를 지정하지 않으면 매번 새 알림)
-        const notificationId = 'gemini-response';
-
-        chrome.notifications.create(notificationId, {
-            type: 'basic', // 'basic', 'image', 'list', 'progress' 등이 있습니다.
-            iconUrl: 'images/icon-128.png', // manifest.json에 등록한 아이콘
-            title: 'Examy',
-            message: geminiText // Gemini가 보낸 전체 텍스트
-        });
+        return geminiText; // 성공 시 Gemini 텍스트를 반환
 
     } catch (error) {
-        console.error("[ERROR] Gemini API call or notification creation failed:", error);
+        console.error("[ERROR] Gemini API call failed:", error);
+        return `Error: ${error.message}`; // 에러 메시지를 반환
     }
 }
