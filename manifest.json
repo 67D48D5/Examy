@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "Examy",
+    "version": "1.0",
+    "description": "Capture the page and query Gemini.",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "notifications"
+    ],
+    "icons": {
+        "16": "images/icon-16.png",
+        "48": "images/icon-48.png",
+        "128": "images/icon-128.png"
+    },
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
+    },
+    "commands": {
+        "capture_and_query": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+E",
+                "mac": "Command+Shift+E"
+            },
+            "description": "Capture the entire page and query Gemini"
+        }
+    },
+    "background": {
+        "service_worker": "background.js"
+    }
+}
