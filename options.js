@@ -30,6 +30,7 @@ function saveOptions() {
     const bottomPos = document.getElementById('bottomPos').value;
     const leftPos = document.getElementById('leftPos').value;
     const maxHeight = document.getElementById('maxHeight').value;
+    const maxWidth = document.getElementById('maxWidth').value;
 
     // Save all settings
     chrome.storage.local.set({
@@ -42,7 +43,8 @@ function saveOptions() {
         style_bgOpacity: bgOpacity,
         style_bottomPos: bottomPos,
         style_leftPos: leftPos,
-        style_maxHeight: maxHeight
+        style_maxHeight: maxHeight,
+        style_maxWidth: maxWidth
     }, () => {
         // Save confirmation message
         const status = document.getElementById('status');
@@ -59,14 +61,15 @@ function restoreOptions() {
     chrome.storage.local.get({
         apiKey: '',
         modelName: 'gemini-2.5-flash',
-        style_fontSize: '14',
-        style_autoHideSeconds: '10',
-        style_textColor: '#FFFFFF',
-        style_bgColor: '#000000',
-        style_bgOpacity: '80',
+        style_fontSize: '12',
+        style_autoHideSeconds: '14',
+        style_textColor: '#d6d6d6',
+        style_bgColor: '#ffffff',
+        style_bgOpacity: '20',
         style_bottomPos: '20',
         style_leftPos: '20',
-        style_maxHeight: '300'
+        style_maxHeight: '20',
+        style_maxWidth: '200'
     }, (items) => {
         document.getElementById('apiKey').value = items.apiKey;
         document.getElementById('modelName').value = items.modelName;
@@ -78,6 +81,7 @@ function restoreOptions() {
         document.getElementById('bottomPos').value = items.style_bottomPos;
         document.getElementById('leftPos').value = items.style_leftPos;
         document.getElementById('maxHeight').value = items.style_maxHeight;
+        document.getElementById('maxWidth').value = items.style_maxWidth;
 
         // Update preview after loading options
         updatePreview();
@@ -90,13 +94,14 @@ function updatePreview() {
     if (!preview) return;
 
     // Read current values from the form.
-    const fontSize = document.getElementById('fontSize').value || '14';
+    const fontSize = document.getElementById('fontSize').value || '12';
     const textColor = document.getElementById('textColor').value;
     const bgColor = document.getElementById('bgColor').value;
-    const bgOpacity = document.getElementById('bgOpacity').value || '80';
+    const bgOpacity = document.getElementById('bgOpacity').value || '20';
     const bottomPos = document.getElementById('bottomPos').value || '20';
     const leftPos = document.getElementById('leftPos').value || '20';
-    const maxHeight = document.getElementById('maxHeight').value || '300';
+    const maxHeight = document.getElementById('maxHeight').value || '20';
+    const maxWidth = document.getElementById('maxWidth').value || '200';
 
     // Apply styles to the preview element in real-time.
     preview.style.fontSize = `${fontSize}px`;
@@ -105,6 +110,7 @@ function updatePreview() {
     preview.style.bottom = `${bottomPos}px`;
     preview.style.left = `${leftPos}px`;
     preview.style.maxHeight = `${maxHeight}px`;
+    preview.style.maxWidth = `${maxWidth}px`;
 }
 
 // Update preview and restore options on DOM load

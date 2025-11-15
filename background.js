@@ -121,7 +121,7 @@ async function queryGeminiWithImage(dataUrl) {
         }
 
         const geminiText = result.candidates[0].content.parts[0].text;
-        console.log("[INFO] Gemini response:", geminiText);
+        console.log("[INFO] Gemini response:\n" + geminiText);
 
         return geminiText; // Return Gemini text on success
 
