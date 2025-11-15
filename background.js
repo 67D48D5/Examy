@@ -83,7 +83,7 @@ async function queryGeminiWithImage(dataUrl) {
     const [mimeTypePart, base64Data] = dataUrl.split(';base64,');
     const mimeType = mimeTypePart.replace('data:', '');
 
-    const prompt = "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on.";
+    const prompt = "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on. If there are no problems, respond with 'No problems found.' Respond in the language used in the image. Answer in plain text without any additional formatting.";
 
     const requestBody = {
         contents: [
