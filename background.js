@@ -8,28 +8,28 @@ chrome.commands.onCommand.addListener(async (command) => {
 
             const tab = tabs[0];
 
-            // 캡처 실행 (결과를 dataUrl로 받음)
+            // Capture and process the visible tab, returning a Data URL
             const dataUrl = await captureAndProcess(tab.windowId);
             if (!dataUrl) {
-                console.error("[ERROR] Capture failed, stopping.");
+                console.error("[ERROR] Page capture failed, stopping.");
                 return;
             }
 
-            // Gemini 쿼리 실행 (결과를 geminiText로 받음)
+            // Query Gemini with the captured image Data URL
             const geminiText = await queryGeminiWithImage(dataUrl);
             if (!geminiText) {
-                console.error("[ERROR] Gemini query failed, stopping.");
+                console.error("[ERROR] Query to Gemini failed, stopping.");
                 return;
             }
 
-            // content.js 스크립트를 현재 탭에 주입
-            // (이미 주입되었다면 이 코드는 무시됨)
+            // Inject content.js script into the current tab
+            // (If already injected, this code is ignored)
             await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 files: ['content.js']
             });
 
-            // content.js로 응답 텍스트를 메시지로 전송
+            // Send the response text to content.js as a message
             chrome.tabs.sendMessage(tab.id, {
                 type: "displayResult",
                 text: geminiText
@@ -44,42 +44,42 @@ chrome.commands.onCommand.addListener(async (command) => {
 async function captureAndProcess(windowId) {
     try {
         const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: "jpeg" });
-        console.log("[INFO] Captured image (Data URL):", dataUrl);
+        console.log("[INFO] Captured page image (Data URL):", dataUrl);
 
-        return dataUrl; // 캡처 데이터를 반환
+        return dataUrl; // Return captured data
     } catch (error) {
         console.error("[ERROR] Capture and process failed:", error);
 
-        return null; // 실패 시 null 반환
+        return null; // Return null on failure
     }
 }
 
 async function queryGeminiWithImage(dataUrl) {
-    // API 키와 모델 이름을 함께 가져오기
-    const storageData = await chrome.storage.local.get(['geminiApiKey', 'geminiModel']);
-    const GEMINI_API_KEY = storageData.geminiApiKey;
+    // Retrieve API key and model name together
+    const storageData = await chrome.storage.local.get(['apiKey', 'modelName']);
+    const GEMINI_API_KEY = storageData.apiKey;
 
-    // 저장된 모델 이름을 사용하고, 없으면 기본값(flash)을 사용합니다.
-    const GEMINI_MODEL = storageData.geminiModel || 'gemini-2.5-flash';
+    // Use stored model name, or default to 'flash' if not set
+    const GEMINI_MODEL = storageData.modelName || 'gemini-2.5-flash';
 
-    // 키가 저장되어 있는지 확인
+    // Check if API key is stored
     if (!GEMINI_API_KEY) {
         console.error("[ERROR] Gemini API Key is not set.");
 
-        // 사용자에게 옵션 페이지로 가도록 알림
+        // Notify user to go to options page
         chrome.notifications.create('no-api-key', {
             type: 'basic',
             iconUrl: 'images/icon-128.png',
             title: 'API Key Required',
-            message: 'Please set the Gemini API Key in the Examy options page.'
+            message: 'Please set the API Key in the Examy options page.'
         });
 
-        // 옵션 페이지 열기
+        // Open options page
         chrome.runtime.openOptionsPage();
-        return null; // API 호출 중단
+        return null; // Stop API call
     }
 
-    // Data URL에서 Base64 데이터와 MIME 타입 추출
+    // Extract Base64 data and MIME type from Data URL
     const [mimeTypePart, base64Data] = dataUrl.split(';base64,');
     const mimeType = mimeTypePart.replace('data:', '');
 
@@ -117,16 +117,16 @@ async function queryGeminiWithImage(dataUrl) {
 
         if (!response.ok) {
             console.error("[ERROR] Gemini API error:", result);
-            return `Error: ${result.error?.message || 'API call failed'}`; // 에러 메시지를 반환
+            return `Error: ${result.error?.message || 'API call failed'}`; // Return error message
         }
 
         const geminiText = result.candidates[0].content.parts[0].text;
         console.log("[INFO] Gemini response:", geminiText);
 
-        return geminiText; // 성공 시 Gemini 텍스트를 반환
+        return geminiText; // Return Gemini text on success
 
     } catch (error) {
         console.error("[ERROR] Gemini API call failed:", error);
-        return `Error: ${error.message}`; // 에러 메시지를 반환
+        return `Error: ${error.message}`; // Return error message
     }
 }

@@ -1,51 +1,97 @@
 // content.js
 
-// background.js로부터 메시지를 받기 위한 리스너
+// Listen for messages from `background.js`
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // 메시지 타입이 'displayResult'일 때만 실행
     if (request.type === "displayResult") {
-        // 화면에 오버레이를 표시하는 함수 호출
         showOverlay(request.text);
     }
 });
 
-function showOverlay(text) {
+// Helper function to convert Hex color code to RGBA string with opacity
+function hexToRgba(hex, opacityPercent) {
+    // 1. Parse Hex code
+    let r = 0, g = 0, b = 0;
+
+    // 3-digit Hex code (#F03)
+    if (hex.length === 4) {
+        r = "0x" + hex[1] + hex[1];
+        g = "0x" + hex[2] + hex[2];
+        b = "0x" + hex[3] + hex[3];
+        // 6-digit Hex code (#FF0033)
+    } else if (hex.length === 7) {
+        r = "0x" + hex[1] + hex[2];
+        g = "0x" + hex[3] + hex[4];
+        b = "0x" + hex[5] + hex[6];
+    }
+
+    // Convert opacity (percent 0-100 -> decimal 0-1)
+    const alpha = (Number(opacityPercent) || 80) / 100;
+
+    // Return rgba string
+    return `rgba(${+r}, ${+g}, ${+b}, ${alpha})`;
+}
+
+// Main function to show overlay with text
+async function showOverlay(text) {
     const OVERLAY_ID = "examy-response-overlay";
 
-    // 매 쿼리마다 리셋: 기존 오버레이가 있다면 제거
+    // Load style settings from chrome.storage
+    const settings = await chrome.storage.local.get({
+        style_fontSize: '14',
+        style_autoHideSeconds: '10',
+        style_textColor: '#FFFFFF',
+        style_bgColor: '#000000',
+        style_bgOpacity: '80',
+        style_bottomPos: '20',
+        style_leftPos: '20',
+        style_padding: '10px 15px',
+        style_borderRadius: '8px',
+        style_maxWidth: '400px',
+        style_maxHeight: '300'
+    });
+
+    // Remove existing overlay if present
     const existingOverlay = document.getElementById(OVERLAY_ID);
     if (existingOverlay) {
         existingOverlay.remove();
     }
 
-    // 새 오버레이 div 요소 생성
     const overlay = document.createElement('div');
     overlay.id = OVERLAY_ID;
 
-    // 요청하신 스타일 적용
-    // (참고: '4포인트'는 5.3px로, 화면에서 거의 보이지 않습니다.)
-    // (가독성을 위해 '14px'와 어두운 배경색으로 임의 조정했습니다.)
+    // Apply styles
     overlay.style.position = 'fixed';
-    overlay.style.bottom = '20px'; // 왼쪽 하단
-    overlay.style.left = '20px';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'; // 어두운 배경
-    overlay.style.color = '#FFFFFF'; // 흰색 글자 (회색보다 가독성 좋음)
-    overlay.style.padding = '10px 15px';
-    overlay.style.borderRadius = '8px';
-    overlay.style.fontSize = '12px';
+    overlay.style.bottom = `${settings.style_bottomPos}px`;
+    overlay.style.left = `${settings.style_leftPos}px`;
+
+    // Apply rgba by combining Hex code and opacity
+    overlay.style.backgroundColor = hexToRgba(
+        settings.style_bgColor,
+        settings.style_bgOpacity
+    );
+
+    overlay.style.color = settings.style_textColor; // Apply text color as is
+    overlay.style.padding = settings.style_padding;
+    overlay.style.borderRadius = settings.style_borderRadius;
+    overlay.style.fontSize = `${settings.style_fontSize}px`;
     overlay.style.fontFamily = 'sans-serif';
-    overlay.style.zIndex = '999999999'; // 다른 요소들 위에 표시
-    overlay.style.maxWidth = '400px'; // 너무 길어지지 않게
-    overlay.style.whiteSpace = 'pre-wrap'; // Gemini 응답의 줄바꿈 유지
+    overlay.style.zIndex = '999999999';
+    overlay.style.maxWidth = settings.style_maxWidth;
+    overlay.style.whiteSpace = 'pre-wrap';
+    overlay.style.maxHeight = `${settings.style_maxHeight}px`;
+    overlay.style.overflowY = 'auto';
 
-    // Gemini 응답 텍스트를 div에 삽입
     overlay.textContent = text;
-
-    // 페이지의 body에 오버레이 추가
     document.body.appendChild(overlay);
 
-    // 14초 후에 자동으로 사라지게 하기
-    setTimeout(() => {
-        overlay.remove();
-    }, 14000); // 14000ms = 14초
+    // Apply saved auto-hide timeout
+    const autoHideMs = Number(settings.style_autoHideSeconds) * 1000;
+    if (autoHideMs > 0) {
+        setTimeout(() => {
+            const currentOverlay = document.getElementById(OVERLAY_ID);
+            if (currentOverlay) {
+                currentOverlay.remove();
+            }
+        }, autoHideMs);
+    }
 }

@@ -5,33 +5,140 @@
     <title>Examy Options</title>
     <meta charset="UTF-8">
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 20px;
-            width: 400px;
+        /* Basic Styles */
+        * {
+            box-sizing: border-box;
         }
 
-        div {
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 15px;
+            /* Add padding */
+            max-width: 700px;
+            /* Use max-width instead of fixed width */
+            margin: 0 auto;
+            /* This is the key to center alignment */
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+            margin-top: 5px;
+            margin-bottom: 20px;
+        }
+
+        /* Card Layout */
+        .settings-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .settings-card h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1em;
+            color: #007bff;
+        }
+
+        /* Form Group */
+        .form-group {
             margin-bottom: 15px;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.9em;
         }
 
-        input[type="text"] {
-            width: 95%;
-            padding: 8px;
+        /* Common Styles for All Input Fields */
+        input[type="text"],
+        input[type="number"],
+        input[type="color"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #fdfdfd;
+        }
+
+        /* Input Field Focus */
+        input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+            outline: none;
+            background-color: #fff;
+        }
+
+        /* Color Picker Height Adjustment */
+        input[type="color"] {
+            padding: 5px;
+            height: 40px;
+        }
+
+        /* Grid Container */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Preview Area Styles */
+        .preview-area {
+            position: relative;
+            height: 150px;
+            background-color: #e9ecef;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        #previewOverlay {
+            position: absolute;
+
+            /* Default values from `content.js` (not in UI) */
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 400px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            z-index: 10;
+
+            font-family: sans-serif;
+            font-size: 14px;
+            color: #FFFFFF;
+            background-color: rgba(0, 0, 0, 0.8);
+            max-height: 300px;
+            bottom: 20px;
+            left: 20px;
+        }
+
+        /* Footer (Button and Status Message) */
+        .footer {
+            text-align: center;
         }
 
         button {
-            padding: 10px 15px;
+            width: 100%;
+            padding: 12px 15px;
             background-color: #007bff;
             color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
         }
 
         button:hover {
@@ -39,25 +146,92 @@
         }
 
         #status {
-            margin-top: 10px;
-            color: green;
+            margin-top: 15px;
+            color: #28a745;
             font-weight: bold;
+            height: 1.2em;
+        }
+
+        small {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+            display: inline-block;
         }
     </style>
 </head>
 
 <body>
     <h1>Examy Options</h1>
-    <div>
-        <label for="apiKey">Gemini API Key:</label>
-        <input type="text" id="apiKey" placeholder="Key...">
+
+    <section class="settings-card">
+        <h2>🚀 Query</h2>
+        <div class="form-group">
+            <label for="apiKey">Gemini API Key:</label>
+            <input type="text" id="apiKey" placeholder="Key...">
+        </div>
+        <div class="form-group">
+            <label for="modelName">Gemini Model:</label>
+            <input type="text" id="modelName" placeholder="gemini-2.5-flash">
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="settings-card">
+        <h2>🎨 Overlay Style</h2>
+
+        <label>Live Preview:</label>
+        <div class="preview-area">
+            <div id="previewOverlay">Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
+                Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
+                Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
+                Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
+            </div>
+        </div>
+        <div class="grid-container">
+            <div class="form-group">
+                <label for="fontSize">Font Size (px):</label>
+                <input type="number" id="fontSize" placeholder="14" class="style-input">
+            </div>
+            <div class="form-group">
+                <label for="autoHideSeconds">Auto Hide (seconds):</label>
+                <input type="number" id="autoHideSeconds" placeholder="10">
+                <small>(Set to 0 to disable)</small>
+            </div>
+            <div class="form-group">
+                <label for="textColor">Text Color:</label>
+                <input type="color" id="textColor" value="#FFFFFF" class="style-input">
+            </div>
+            <div class="form-group">
+                <label for="bgColor">Background Color:</label>
+                <input type="color" id="bgColor" value="#000000" class="style-input">
+            </div>
+
+            <div class="form-group">
+                <label for="bgOpacity">Background Opacity (%):</label>
+                <input type="number" id="bgOpacity" placeholder="80" min="0" max="100" class="style-input">
+            </div>
+            <div class="form-group">
+                <label for="bottomPos">Vertical Position (px):</label>
+                <input type="number" id="bottomPos" placeholder="20" class="style-input">
+            </div>
+            <div class="form-group">
+                <label for="leftPos">Horizontal Position (px):</label>
+                <input type="number" id="leftPos" placeholder="20" class="style-input">
+            </div>
+
+            <div class="form-group">
+                <label for="maxHeight">Max Height (px):</label>
+                <input type="number" id="maxHeight" placeholder="300" min="0" class="style-input">
+            </div>
+        </div>
+    </section>
+
+    <div class="footer">
+        <button id="saveButton">Save Settings</button>
+        <div id="status"></div>
     </div>
-    <div>
-        <label for="geminiModel">Gemini Model:</label>
-        <input type="text" id="geminiModel" placeholder="gemini-2.5-flash">
-    </div>
-    <button id="saveButton">Save</button>
-    <div id="status"></div>
 
     <script src="options.js"></script>
 </body>
