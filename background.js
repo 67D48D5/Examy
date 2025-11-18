@@ -8,10 +8,28 @@ chrome.commands.onCommand.addListener(async (command) => {
 
             const tab = tabs[0];
 
+            // Inject content.js script into the current tab
+            // (If already injected, this code is ignored)
+            await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['content.js']
+            });
+
+            // Notify content script that capture is starting
+            chrome.tabs.sendMessage(tab.id, {
+                type: "displayResult",
+                text: "[INFO] Capturing page and querying, please wait..."
+            });
+
             // Capture and process the visible tab, returning a Data URL
             const dataUrl = await captureAndProcess(tab.windowId);
             if (!dataUrl) {
                 console.error("[ERROR] Page capture failed, stopping.");
+                chrome.tabs.sendMessage(tab.id, {
+                    type: "displayResult",
+                    text: "[ERROR] Page capture failed."
+                });
+
                 return;
             }
 
@@ -19,15 +37,13 @@ chrome.commands.onCommand.addListener(async (command) => {
             const geminiText = await queryGeminiWithImage(dataUrl);
             if (!geminiText) {
                 console.error("[ERROR] Query to Gemini failed, stopping.");
+                chrome.tabs.sendMessage(tab.id, {
+                    type: "displayResult",
+                    text: "[ERROR] Query to Gemini failed. Retry later."
+                });
+
                 return;
             }
-
-            // Inject content.js script into the current tab
-            // (If already injected, this code is ignored)
-            await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ['content.js']
-            });
 
             // Send the response text to content.js as a message
             chrome.tabs.sendMessage(tab.id, {
@@ -123,7 +139,7 @@ async function queryGeminiWithImage(dataUrl) {
         const geminiText = result.candidates[0].content.parts[0].text;
         console.log("[INFO] Gemini response:\n" + geminiText);
 
-        return geminiText; // Return Gemini text on success
+        return "[INFO] Query response:\n" + geminiText; // Return Gemini text on success
 
     } catch (error) {
         console.error("[ERROR] Gemini API call failed:", error);
