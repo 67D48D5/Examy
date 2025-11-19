@@ -25,6 +25,13 @@
                 "mac": "Command+Shift+E"
             },
             "description": "Capture the entire page and query Gemini"
+        },
+        "toggle_overlay": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+D",
+                "mac": "Command+Shift+D"
+            },
+            "description": "Toggle the response overlay"
         }
     },
     "background": {

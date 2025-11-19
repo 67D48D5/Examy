@@ -1,6 +1,25 @@
 // background.js
 
 chrome.commands.onCommand.addListener(async (command) => {
+    if (command === "toggle_overlay") {
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tabs.length === 0) return;
+
+        const tab = tabs[0];
+
+        // Inject content.js script into the current tab
+        // (If already injected, this code is ignored)
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['content.js']
+        });
+
+        // Send message to content script to toggle overlay
+        chrome.tabs.sendMessage(tab.id, {
+            type: "toggleOverlay"
+        });
+    }
+
     if (command === "capture_and_query") {
         try {
             const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -15,12 +34,6 @@ chrome.commands.onCommand.addListener(async (command) => {
                 files: ['content.js']
             });
 
-            // Notify content script that capture is starting
-            chrome.tabs.sendMessage(tab.id, {
-                type: "displayResult",
-                text: "[INFO] Capturing page and querying, please wait..."
-            });
-
             // Capture and process the visible tab, returning a Data URL
             const dataUrl = await captureAndProcess(tab.windowId);
             if (!dataUrl) {
@@ -32,6 +45,12 @@ chrome.commands.onCommand.addListener(async (command) => {
 
                 return;
             }
+
+            // Notify content script that capture is starting
+            chrome.tabs.sendMessage(tab.id, {
+                type: "displayResult",
+                text: "[INFO] Captured page and querying, please wait..."
+            });
 
             // Query Gemini with the captured image Data URL
             const geminiText = await queryGeminiWithImage(dataUrl);

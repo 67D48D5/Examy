@@ -5,11 +5,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "displayResult") {
         showOverlay(request.text);
     }
+
+    if (request.type === "toggleOverlay") {
+        const overlay = document.getElementById("examy-response-overlay");
+
+        // If overlay doesn't exist, create and show it first
+        if (!overlay) {
+            showOverlay("[INFO] Examy Overlay\nPress the shortcut again to hide this overlay.");
+            return;
+        }
+
+        // Check the computed style to get the actual display value
+        const currentStyle = window.getComputedStyle(overlay).display;
+
+        // Toggle display based on current style
+        if (currentStyle === "none") {
+            overlay.style.display = "";
+        } else {
+            overlay.style.display = "none";
+        }
+
+        sendResponse({ status: "toggled" });
+    }
 });
 
 // Helper function to convert Hex color code to RGBA string with opacity
 function hexToRgba(hex, opacityPercent) {
-    // 1. Parse Hex code
+    // Parse Hex code
     let r = 0, g = 0, b = 0;
 
     // 3-digit Hex code (#F03)
