@@ -5,236 +5,289 @@
     <title>Examy Options</title>
     <meta charset="UTF-8">
     <style>
-        /* Basic Styles */
-        * {
-            box-sizing: border-box;
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            padding: 15px;
-            /* Add padding */
-            max-width: 700px;
-            /* Use max-width instead of fixed width */
-            margin: 0 auto;
-            /* This is the key to center alignment */
-            background-color: #f4f7f6;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
         }
 
         h1 {
-            text-align: center;
-            color: #222;
-            margin-top: 5px;
-            margin-bottom: 20px;
+            text-align: left;
+            color: #1e293b;
+            margin-bottom: 30px;
+            font-weight: 800;
         }
 
-        /* Card Layout */
         .settings-card {
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
         }
 
         .settings-card h2 {
             margin-top: 0;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 1.1em;
-            color: #007bff;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
         }
 
-        /* Form Group */
-        .form-group {
+        /* Grid Layout for Form */
+        .grid-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             margin-bottom: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
         }
 
         label {
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
-            font-size: 0.9em;
+            font-size: 0.9rem;
+            color: #475569;
         }
 
-        /* Common Styles for All Input Fields */
         input[type="text"],
         input[type="number"],
         input[type="color"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-            background-color: #fdfdfd;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
         }
 
-        /* Input Field Focus */
-        input:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
-            outline: none;
-            background-color: #fff;
-        }
-
-        /* Color Picker Height Adjustment */
         input[type="color"] {
-            padding: 5px;
-            height: 40px;
+            height: 42px;
+            padding: 4px;
+            cursor: pointer;
         }
 
-        /* Grid Container */
-        .grid-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        /* Preview Area Styles */
-        .preview-area {
+        small {
+            display: block;
+            margin-top: 4px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        /* Preview Area */
+        .preview-container {
             position: relative;
-            height: 150px;
-            background-color: #e9ecef;
-            border: 1px dashed #ccc;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            padding: 10px;
+            height: 300px;
+            background-color: white;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
             overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .preview-bg-text {
+            padding: 20px;
+            color: #cbd5e1;
+            font-family: serif;
+            font-size: 14px;
+            line-height: 1.6;
+            user-select: none;
         }
 
         #previewOverlay {
             position: absolute;
-
-            /* Default values from `content.js` (not in UI) */
-            padding: 10px 15px;
+            /* Default styles will be injected by JS */
+            padding: 15px;
             border-radius: 8px;
-            max-width: 400px;
-            white-space: pre-wrap;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             overflow-y: auto;
             z-index: 10;
-
-            font-family: sans-serif;
-            font-size: 14px;
-            color: #FFFFFF;
-            background-color: rgba(0, 0, 0, 0.8);
-            max-height: 300px;
-            bottom: 20px;
-            left: 20px;
+            white-space: pre-wrap;
+            backdrop-filter: blur(2px);
+            /* Modern glass effect */
+            transition: all 0.2s ease-out;
         }
 
-        /* Footer (Button and Status Message) */
+        /* Footer Buttons */
         .footer {
-            text-align: center;
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         button {
-            width: 100%;
-            padding: 12px 15px;
-            background-color: #007bff;
-            color: white;
+            padding: 12px 20px;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
+            border-radius: 6px;
+            font-size: 1rem;
             font-weight: 600;
-            transition: background-color 0.2s ease;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            flex: 1;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #saveButton {
+            background-color: var(--primary-color);
+            color: white;
+            flex: 2;
+        }
+
+        #saveButton:hover {
+            background-color: #1d4ed8;
+        }
+
+        #resetButton {
+            background-color: #e2e8f0;
+            color: #475569;
+            flex: 1;
+        }
+
+        #resetButton:hover {
+            background-color: #cbd5e1;
         }
 
         #status {
+            text-align: center;
             margin-top: 15px;
-            color: #28a745;
-            font-weight: bold;
-            height: 1.2em;
+            height: 20px;
+            font-weight: 600;
+            color: #10b981;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        small {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
-            display: inline-block;
+        #status.show {
+            opacity: 1;
         }
     </style>
 </head>
 
 <body>
-    <h1>Examy Options</h1>
+    <div class="container">
+        <h1>⚙️ Examy Options</h1>
 
-    <section class="settings-card">
-        <h2>🚀 Query</h2>
-        <div class="form-group">
-            <label for="apiKey">Gemini API Key:</label>
-            <input type="text" id="apiKey" placeholder="Key...">
+        <section class="settings-card">
+            <h2>🚀 Gemini API</h2>
+            <div class="grid-row">
+                <div class="form-group full-width">
+                    <label for="apiKey">API Key</label>
+                    <input type="text" id="apiKey" placeholder="AIzaSy...">
+                    <small>Enter the API key issued from Google AI Studio.</small>
+                </div>
+                <div class="form-group full-width">
+                    <label for="modelName">Model Name</label>
+                    <input type="text" id="modelName" placeholder="gemini-2.5-flash">
+                    <small>Specify the Gemini model to use. For example, <italic>gemini-2.5-flash, gemini-2.5-pro, etc.
+                        </italic></small>
+                </div>
+            </div>
+        </section>
+
+        <section class="settings-card">
+            <h2>🎨 Overlay Style</h2>
+
+            <div class="preview-container">
+                <div class="preview-bg-text">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                    culpa qui officia deserunt mollit anim id est laborum.
+                    <br><br>
+                    (This text simulates the webpage content behind the overlay. Test the background opacity settings.)
+                </div>
+                <div id="previewOverlay"><strong>Examy Answer:</strong><br>This is preview text.<br>Changes will be reflected in real-time.</div>
+            </div>
+
+            <div class="grid-row">
+                <div class="form-group">
+                    <label for="textColor">Text Color</label>
+                    <input type="color" id="textColor" class="style-input">
+                </div>
+                <div class="form-group">
+                    <label for="bgColor">Background Color</label>
+                    <input type="color" id="bgColor" class="style-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="bgOpacity">Background Opacity (%)</label>
+                    <input type="number" id="bgOpacity" min="0" max="100" class="style-input">
+                </div>
+                <div class="form-group">
+                    <label for="fontSize">Font Size (px)</label>
+                    <input type="number" id="fontSize" min="8" max="40" class="style-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="bottomPos">Bottom Margin (px)</label>
+                    <input type="number" id="bottomPos" class="style-input">
+                </div>
+                <div class="form-group">
+                    <label for="leftPos">Left Margin (px)</label>
+                    <input type="number" id="leftPos" class="style-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="maxWidth">Maximum Width (px)</label>
+                    <input type="number" id="maxWidth" class="style-input">
+                </div>
+                <div class="form-group">
+                    <label for="maxHeight">Maximum Height (px)</label>
+                    <input type="number" id="maxHeight" class="style-input">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="autoHideSeconds">Auto Hide (seconds)</label>
+                    <input type="number" id="autoHideSeconds" placeholder="0 = Off">
+                    <small>The time after which the overlay automatically disappears. (Set to 0 to keep it
+                        visible)</small>
+                </div>
+            </div>
+        </section>
+
+        <div class="footer">
+            <button id="resetButton">Restore Defaults</button>
+            <button id="saveButton">Save</button>
         </div>
-        <div class="form-group">
-            <label for="modelName">Gemini Model:</label>
-            <input type="text" id="modelName" placeholder="gemini-2.5-flash">
-        </div>
-    </section>
-
-    <hr>
-
-    <section class="settings-card">
-        <h2>🎨 Overlay Style</h2>
-
-        <label>Live Preview:</label>
-        <div class="preview-area">
-            <div id="previewOverlay">Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
-                Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
-                Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
-                Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview Preview
-            </div>
-        </div>
-        <div class="grid-container">
-            <div class="form-group">
-                <label for="fontSize">Font Size (px):</label>
-                <input type="number" id="fontSize" placeholder="14" class="style-input">
-            </div>
-            <div class="form-group">
-                <label for="autoHideSeconds">Auto Hide (seconds):</label>
-                <input type="number" id="autoHideSeconds" placeholder="10">
-                <small>(Set to 0 to disable)</small>
-            </div>
-            <div class="form-group">
-                <label for="textColor">Text Color:</label>
-                <input type="color" id="textColor" value="#FFFFFF" class="style-input">
-            </div>
-            <div class="form-group">
-                <label for="bgColor">Background Color:</label>
-                <input type="color" id="bgColor" value="#000000" class="style-input">
-            </div>
-            <div class="form-group">
-                <label for="bgOpacity">Background Opacity (%):</label>
-                <input type="number" id="bgOpacity" placeholder="80" min="0" max="100" class="style-input">
-            </div>
-
-            <div class="form-group">
-                <label for="bottomPos">Vertical Position (px):</label>
-                <input type="number" id="bottomPos" placeholder="20" class="style-input">
-            </div>
-            <div class="form-group">
-                <label for="leftPos">Horizontal Position (px):</label>
-                <input type="number" id="leftPos" placeholder="20" class="style-input">
-            </div>
-
-            <div class="form-group">
-                <label for="maxHeight">Max Height (px):</label>
-                <input type="number" id="maxHeight" placeholder="300" min="0" class="style-input">
-            </div>
-            <div class="form-group">
-                <label for="maxWidth">Max Width (px):</label>
-                <input type="number" id="maxWidth" placeholder="200" min="0" class="style-input">
-            </div>
-        </div>
-    </section>
-
-    <div class="footer">
-        <button id="saveButton">Save Settings</button>
-        <div id="status"></div>
+        <div id="status">Settings saved!</div>
     </div>
 
     <script src="options.js"></script>
