@@ -36,21 +36,21 @@ function hexToRgba(hex, opacityPercent) {
 
     // 3-digit Hex code (#F03)
     if (hex.length === 4) {
-        r = "0x" + hex[1] + hex[1];
-        g = "0x" + hex[2] + hex[2];
-        b = "0x" + hex[3] + hex[3];
+        r = parseInt(hex[1] + hex[1], 16);
+        g = parseInt(hex[2] + hex[2], 16);
+        b = parseInt(hex[3] + hex[3], 16);
         // 6-digit Hex code (#FF0033)
     } else if (hex.length === 7) {
-        r = "0x" + hex[1] + hex[2];
-        g = "0x" + hex[3] + hex[4];
-        b = "0x" + hex[5] + hex[6];
+        r = parseInt(hex[1] + hex[2], 16);
+        g = parseInt(hex[3] + hex[4], 16);
+        b = parseInt(hex[5] + hex[6], 16);
     }
 
     // Convert opacity (percent 0-100 -> decimal 0-1)
     const alpha = (Number(opacityPercent) || 80) / 100;
 
     // Return rgba string
-    return `rgba(${+r}, ${+g}, ${+b}, ${alpha})`;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 // Main function to show overlay with text
