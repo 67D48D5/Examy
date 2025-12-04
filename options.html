@@ -109,35 +109,9 @@
         }
 
         /* Preview Area */
-        .preview-container {
-            position: relative;
-            height: 300px;
-            background-color: white;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .preview-bg-text {
-            padding: 20px;
-            color: #cbd5e1;
-            font-family: serif;
-            font-size: 14px;
-            line-height: 1.6;
-            user-select: none;
-        }
-
         #previewOverlay {
-            position: absolute;
             /* Default styles will be injected by JS */
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            overflow-y: auto;
-            z-index: 10;
-            white-space: pre-wrap;
-            backdrop-filter: blur(2px);
+            position: fixed;
             /* Modern glass effect */
             transition: all 0.2s ease-out;
         }
@@ -224,17 +198,12 @@
         <section class="settings-card">
             <h2>🎨 Overlay Style</h2>
 
-            <div class="preview-container">
-                <div class="preview-bg-text">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
-                    et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                    aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-                    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-                    culpa qui officia deserunt mollit anim id est laborum.
-                    <br><br>
-                    (This text simulates the webpage content behind the overlay. Test the background opacity settings.)
-                </div>
-                <div id="previewOverlay"><strong>Examy Answer:</strong><br>This is preview text.<br>Changes will be reflected in real-time.</div>
+            <div id="previewOverlay"><strong>Examy Answer:</strong><br>Lorem ipsum dolor sit amet, consectetur
+                adipiscing elit. Sed do eiusmod tempor incididunt ut labore
+                et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                culpa qui officia deserunt mollit anim id est laborum.
             </div>
 
             <div class="grid-row">
