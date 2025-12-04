@@ -59,17 +59,17 @@ async function showOverlay(text) {
 
     // Load style settings from chrome.storage
     const settings = await chrome.storage.local.get({
-        style_fontSize: '14',
-        style_autoHideSeconds: '10',
+        style_fontSize: 14,
+        style_autoHideSeconds: 10,
         style_textColor: '#FFFFFF',
         style_bgColor: '#000000',
-        style_bgOpacity: '80',
-        style_bottomPos: '20',
-        style_leftPos: '20',
+        style_bgOpacity: 80,
+        style_bottomPos: 20,
+        style_leftPos: 20,
         style_padding: '10px 15px',
         style_borderRadius: '8px',
-        style_maxWidth: '400px',
-        style_maxHeight: '300'
+        style_maxWidth: 400,
+        style_maxHeight: 300
     });
 
     // Remove existing overlay if present
@@ -98,7 +98,7 @@ async function showOverlay(text) {
     overlay.style.fontSize = `${settings.style_fontSize}px`;
     overlay.style.fontFamily = 'sans-serif';
     overlay.style.zIndex = '999999999';
-    overlay.style.maxWidth = settings.style_maxWidth;
+    overlay.style.maxWidth = `${settings.style_maxWidth}px`;
     overlay.style.whiteSpace = 'pre-wrap';
     overlay.style.maxHeight = `${settings.style_maxHeight}px`;
     overlay.style.overflowY = 'auto';
