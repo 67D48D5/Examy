@@ -4,15 +4,15 @@
 const DEFAULT_OPTIONS = {
     apiKey: '',
     modelName: 'gemini-2.5-flash',
-    style_fontSize: 12,
-    style_autoHideSeconds: 14,
-    style_textColor: '#ededed',
-    style_bgColor: '#ffffff',
-    style_bgOpacity: 4,
-    style_bottomPos: 384,
-    style_leftPos: 458,
-    style_maxHeight: 128,
-    style_maxWidth: 384
+    style_fontSize: 14,
+    style_autoHideSeconds: 10,
+    style_textColor: '#FFFFFF',
+    style_bgColor: '#000000',
+    style_bgOpacity: 80,
+    style_bottomPos: 20,
+    style_leftPos: 20,
+    style_maxHeight: 300,
+    style_maxWidth: 400
 };
 
 // Helper function to convert hex color to RGBA

@@ -36,21 +36,21 @@ function hexToRgba(hex, opacityPercent) {
 
     // 3-digit Hex code (#F03)
     if (hex.length === 4) {
-        r = "0x" + hex[1] + hex[1];
-        g = "0x" + hex[2] + hex[2];
-        b = "0x" + hex[3] + hex[3];
+        r = parseInt(hex[1] + hex[1], 16);
+        g = parseInt(hex[2] + hex[2], 16);
+        b = parseInt(hex[3] + hex[3], 16);
         // 6-digit Hex code (#FF0033)
     } else if (hex.length === 7) {
-        r = "0x" + hex[1] + hex[2];
-        g = "0x" + hex[3] + hex[4];
-        b = "0x" + hex[5] + hex[6];
+        r = parseInt(hex[1] + hex[2], 16);
+        g = parseInt(hex[3] + hex[4], 16);
+        b = parseInt(hex[5] + hex[6], 16);
     }
 
     // Convert opacity (percent 0-100 -> decimal 0-1)
     const alpha = (Number(opacityPercent) || 80) / 100;
 
     // Return rgba string
-    return `rgba(${+r}, ${+g}, ${+b}, ${alpha})`;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 // Main function to show overlay with text
@@ -59,17 +59,17 @@ async function showOverlay(text) {
 
     // Load style settings from chrome.storage
     const settings = await chrome.storage.local.get({
-        style_fontSize: '14',
-        style_autoHideSeconds: '10',
+        style_fontSize: 14,
+        style_autoHideSeconds: 10,
         style_textColor: '#FFFFFF',
         style_bgColor: '#000000',
-        style_bgOpacity: '80',
-        style_bottomPos: '20',
-        style_leftPos: '20',
+        style_bgOpacity: 80,
+        style_bottomPos: 20,
+        style_leftPos: 20,
         style_padding: '10px 15px',
         style_borderRadius: '8px',
-        style_maxWidth: '400px',
-        style_maxHeight: '300'
+        style_maxWidth: 400,
+        style_maxHeight: 300
     });
 
     // Remove existing overlay if present
@@ -98,7 +98,7 @@ async function showOverlay(text) {
     overlay.style.fontSize = `${settings.style_fontSize}px`;
     overlay.style.fontFamily = 'sans-serif';
     overlay.style.zIndex = '999999999';
-    overlay.style.maxWidth = settings.style_maxWidth;
+    overlay.style.maxWidth = `${settings.style_maxWidth}px`;
     overlay.style.whiteSpace = 'pre-wrap';
     overlay.style.maxHeight = `${settings.style_maxHeight}px`;
     overlay.style.overflowY = 'auto';
