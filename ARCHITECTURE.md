@@ -3,6 +3,22 @@
 ## Overview
 Examy is a Chrome extension that captures screenshots and queries the Gemini AI API for answers. This document describes the refactored architecture.
 
+## Refactoring Benefits
+
+### Before Refactoring
+- **Monolithic files**: All logic in 3 large files
+- **Code duplication**: `hexToRgba()` duplicated across files
+- **Mixed concerns**: API logic, UI logic, and utilities all together
+- **Hard to maintain**: Changes required editing multiple unrelated sections
+- **No clear structure**: Difficult to understand dependencies
+
+### After Refactoring
+- **Modular design**: Logic separated into focused modules
+- **DRY principle**: No code duplication, shared utilities extracted
+- **Clear separation**: Services, utilities, and UI logic separated
+- **Easy to maintain**: Changes isolated to relevant modules
+- **Clear architecture**: Dependencies and responsibilities documented
+
 ## Architecture
 
 ### Directory Structure
