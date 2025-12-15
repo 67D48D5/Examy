@@ -1,44 +1,26 @@
-// options.js
+// options.js - Options page logic
 
-// Default values for the settings
-const DEFAULT_OPTIONS = {
-    apiKey: '',
-    modelName: 'gemini-2.5-flash',
-    style_fontSize: 14,
-    style_autoHideSeconds: 10,
-    style_textColor: '#FFFFFF',
-    style_bgColor: '#000000',
-    style_bgOpacity: 80,
-    style_bottomPos: 20,
-    style_leftPos: 20,
-    style_maxHeight: 300,
-    style_maxWidth: 400
-};
+import { DEFAULT_SETTINGS } from './utils/constants.js';
+import { hexToRgba } from './utils/color-utils.js';
+import { getStorageValues, setStorageValues } from './utils/chrome-helpers.js';
 
-// Helper function to convert hex color to RGBA
-function hexToRgba(hex, opacityPercent) {
-    let r = 0, g = 0, b = 0;
+/**
+ * Saves options to storage
+ */
+function saveOptions() {
+    const settings = collectFormValues();
 
-    // Handle 3-digit (#FFF) format
-    if (hex.length === 4) {
-        r = parseInt(hex[1] + hex[1], 16);
-        g = parseInt(hex[2] + hex[2], 16);
-        b = parseInt(hex[3] + hex[3], 16);
-    }
-    // Handle 6-digit (#FFFFFF) format
-    else if (hex.length === 7) {
-        r = parseInt(hex[1] + hex[2], 16);
-        g = parseInt(hex[3] + hex[4], 16);
-        b = parseInt(hex[5] + hex[6], 16);
-    }
-
-    const alpha = (Number(opacityPercent) || 80) / 100;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    setStorageValues(settings).then(() => {
+        showStatusMessage('Settings saved!');
+    });
 }
 
-// Save options function
-function saveOptions() {
-    const settings = {
+/**
+ * Collects all form values into a settings object
+ * @returns {Object} Settings object
+ */
+function collectFormValues() {
+    return {
         apiKey: document.getElementById('apiKey').value,
         modelName: document.getElementById('modelName').value,
         style_fontSize: Number(document.getElementById('fontSize').value),
@@ -51,20 +33,12 @@ function saveOptions() {
         style_maxHeight: Number(document.getElementById('maxHeight').value),
         style_maxWidth: Number(document.getElementById('maxWidth').value)
     };
-
-    chrome.storage.local.set(settings, () => {
-        const status = document.getElementById('status');
-
-        status.textContent = 'Settings saved!';
-        status.classList.add('show');
-
-        setTimeout(() => {
-            status.classList.remove('show');
-        }, 2000);
-    });
 }
 
-// Fill UI with values function
+/**
+ * Sets form values from a settings object
+ * @param {Object} items - Settings to apply to form
+ */
 function setFormValues(items) {
     document.getElementById('apiKey').value = items.apiKey;
     document.getElementById('modelName').value = items.modelName;
@@ -78,38 +52,44 @@ function setFormValues(items) {
     document.getElementById('maxHeight').value = items.style_maxHeight;
     document.getElementById('maxWidth').value = items.style_maxWidth;
 
-    updatePreview(); // Update preview after setting values
+    updatePreview();
 }
 
-// Restore options function
+/**
+ * Restores options from storage
+ */
 function restoreOptions() {
-    chrome.storage.local.get(DEFAULT_OPTIONS, (items) => {
+    getStorageValues(DEFAULT_SETTINGS).then((items) => {
         setFormValues(items);
     });
 }
 
-// Reset options to default function
+/**
+ * Resets options to default values
+ */
 function resetOptions() {
     if (confirm('Are you sure you want to reset all settings to their default values? The API key will not be retained.')) {
-        setFormValues(DEFAULT_OPTIONS);
-        saveOptions(); // Save immediately after reset
+        setFormValues(DEFAULT_SETTINGS);
+        saveOptions();
     }
 }
 
-// Update preview function
+/**
+ * Updates the preview overlay with current form values
+ */
 function updatePreview() {
     const preview = document.getElementById('previewOverlay');
     if (!preview) return;
 
     // Get current input values (use default if empty)
-    const fontSize = document.getElementById('fontSize').value || DEFAULT_OPTIONS.style_fontSize;
-    const textColor = document.getElementById('textColor').value || DEFAULT_OPTIONS.style_textColor;
-    const bgColor = document.getElementById('bgColor').value || DEFAULT_OPTIONS.style_bgColor;
-    const bgOpacity = document.getElementById('bgOpacity').value || DEFAULT_OPTIONS.style_bgOpacity;
-    const bottomPos = document.getElementById('bottomPos').value || DEFAULT_OPTIONS.style_bottomPos;
-    const leftPos = document.getElementById('leftPos').value || DEFAULT_OPTIONS.style_leftPos;
-    const maxHeight = document.getElementById('maxHeight').value || DEFAULT_OPTIONS.style_maxHeight;
-    const maxWidth = document.getElementById('maxWidth').value || DEFAULT_OPTIONS.style_maxWidth;
+    const fontSize = document.getElementById('fontSize').value || DEFAULT_SETTINGS.style_fontSize;
+    const textColor = document.getElementById('textColor').value || DEFAULT_SETTINGS.style_textColor;
+    const bgColor = document.getElementById('bgColor').value || DEFAULT_SETTINGS.style_bgColor;
+    const bgOpacity = document.getElementById('bgOpacity').value || DEFAULT_SETTINGS.style_bgOpacity;
+    const bottomPos = document.getElementById('bottomPos').value || DEFAULT_SETTINGS.style_bottomPos;
+    const leftPos = document.getElementById('leftPos').value || DEFAULT_SETTINGS.style_leftPos;
+    const maxHeight = document.getElementById('maxHeight').value || DEFAULT_SETTINGS.style_maxHeight;
+    const maxWidth = document.getElementById('maxWidth').value || DEFAULT_SETTINGS.style_maxWidth;
 
     // Apply styles to preview
     preview.style.fontSize = `${fontSize}px`;
@@ -121,10 +101,24 @@ function updatePreview() {
     preview.style.maxWidth = `${maxWidth}px`;
 }
 
-// Register event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    restoreOptions();
+/**
+ * Shows a status message temporarily
+ * @param {string} message - Message to display
+ */
+function showStatusMessage(message) {
+    const status = document.getElementById('status');
+    status.textContent = message;
+    status.classList.add('show');
 
+    setTimeout(() => {
+        status.classList.remove('show');
+    }, 2000);
+}
+
+/**
+ * Initializes event listeners
+ */
+function initializeEventListeners() {
     document.getElementById('saveButton').addEventListener('click', saveOptions);
     document.getElementById('resetButton').addEventListener('click', resetOptions);
 
@@ -133,4 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
     styleInputs.forEach(input => {
         input.addEventListener('input', updatePreview);
     });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    restoreOptions();
+    initializeEventListeners();
 });
