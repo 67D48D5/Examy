@@ -42,6 +42,17 @@ export async function queryGeminiWithImage(dataUrl) {
             return `Error: ${result.error?.message || 'API call failed'}`;
         }
 
+        // Validate response structure
+        if (!result.candidates || 
+            !result.candidates[0] || 
+            !result.candidates[0].content || 
+            !result.candidates[0].content.parts || 
+            !result.candidates[0].content.parts[0] || 
+            !result.candidates[0].content.parts[0].text) {
+            console.error(`${LOG_PREFIX.ERROR} Unexpected Gemini API response structure:`, result);
+            return 'Error: Unexpected API response format';
+        }
+
         const geminiText = result.candidates[0].content.parts[0].text;
         console.log(`${LOG_PREFIX.INFO} Gemini response:\n${geminiText}`);
 

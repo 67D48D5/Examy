@@ -29,7 +29,7 @@ export async function injectContentScript(tabId, files) {
  * @returns {Promise<void>}
  */
 export async function sendMessageToTab(tabId, message) {
-    chrome.tabs.sendMessage(tabId, message);
+    return chrome.tabs.sendMessage(tabId, message);
 }
 
 /**
@@ -57,7 +57,7 @@ export async function setStorageValues(items) {
  * @returns {Promise<void>}
  */
 export async function createNotification(notificationId, options) {
-    chrome.notifications.create(notificationId, options);
+    return chrome.notifications.create(notificationId, options);
 }
 
 /**
