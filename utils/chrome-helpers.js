@@ -16,10 +16,14 @@ export async function getActiveTab() {
  * @returns {Promise<void>}
  */
 export async function injectContentScript(tabId, files) {
-    await chrome.scripting.executeScript({
-        target: { tabId },
-        files
-    });
+    try {
+        await chrome.tabs.sendMessage(tabId, { type: 'PING' });
+    } catch (error) {
+        await chrome.scripting.executeScript({
+            target: { tabId },
+            files: files
+        });
+    }
 }
 
 /**

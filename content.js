@@ -1,12 +1,9 @@
 // content.js - Content script for overlay display
 
-if (window.examyLoaded) {
-    console.log("Examy content script already loaded.");
-} else {
-    (() => {
-        window.examyLoaded = true;
+if (typeof window.examyInjected === 'undefined') {
+    window.examyInjected = true;
 
-        // Constants
+    (() => {
         const MESSAGE_TYPES = {
             DISPLAY_RESULT: 'displayResult',
             TOGGLE_OVERLAY: 'toggleOverlay'
@@ -114,6 +111,11 @@ if (window.examyLoaded) {
 
         // Message Handler
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request.type === 'PING') {
+                sendResponse({ status: 'pong' });
+                return;
+            }
+
             if (request.type === MESSAGE_TYPES.DISPLAY_RESULT) {
                 showOverlay(request.text);
             } else if (request.type === MESSAGE_TYPES.TOGGLE_OVERLAY) {
