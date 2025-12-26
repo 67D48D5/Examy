@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS = {
     style_autoHideSeconds: 0,
     style_textColor: '#e8e8e8',
     style_bgColor: '#ffffff',
-    style_bgOpacity: 80,
+    style_bgOpacity: 1,
     style_bottomPos: 458,
     style_leftPos: 384,
     style_maxHeight: 384,

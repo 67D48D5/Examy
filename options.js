@@ -29,7 +29,7 @@ const FORM_FIELD_MAPPING = {
  * Numeric field IDs that need numeric parsing
  */
 const NUMERIC_FIELDS = new Set([
-    'fontSize', 'autoHideSeconds', 'bgOpacity', 
+    'fontSize', 'autoHideSeconds', 'bgOpacity',
     'bottomPos', 'leftPos', 'maxHeight', 'maxWidth'
 ]);
 

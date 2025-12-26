@@ -1,4 +1,4 @@
-// color-utils.js - Color conversion utilities
+// color-utils.js
 
 /**
  * Converts a hex color code to RGBA string with opacity
