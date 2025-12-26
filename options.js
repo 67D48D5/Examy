@@ -5,6 +5,35 @@ import { hexToRgba } from './utils/color-utils.js';
 import { getStorageValues, setStorageValues } from './utils/chrome-helpers.js';
 
 /**
+ * Mapping between form field IDs and settings keys
+ */
+const FORM_FIELD_MAPPING = {
+    'apiKey': 'apiKey',
+    'modelName': 'modelName',
+    'baseUrl': 'gemini_baseUrl',
+    'prompt': 'gemini_prompt',
+    'fontSize': 'style_fontSize',
+    'autoHideSeconds': 'style_autoHideSeconds',
+    'textColor': 'style_textColor',
+    'bgColor': 'style_bgColor',
+    'bgOpacity': 'style_bgOpacity',
+    'bottomPos': 'style_bottomPos',
+    'leftPos': 'style_leftPos',
+    'maxHeight': 'style_maxHeight',
+    'maxWidth': 'style_maxWidth',
+    'padding': 'style_padding',
+    'borderRadius': 'style_borderRadius'
+};
+
+/**
+ * Numeric field IDs that need numeric parsing
+ */
+const NUMERIC_FIELDS = new Set([
+    'fontSize', 'autoHideSeconds', 'bgOpacity', 
+    'bottomPos', 'leftPos', 'maxHeight', 'maxWidth'
+]);
+
+/**
  * Saves options to storage
  */
 function saveOptions() {
@@ -56,35 +85,6 @@ function validateSettings(settings) {
 
     return true;
 }
-
-/**
- * Mapping between form field IDs and settings keys
- */
-const FORM_FIELD_MAPPING = {
-    'apiKey': 'apiKey',
-    'modelName': 'modelName',
-    'baseUrl': 'gemini_baseUrl',
-    'prompt': 'gemini_prompt',
-    'fontSize': 'style_fontSize',
-    'autoHideSeconds': 'style_autoHideSeconds',
-    'textColor': 'style_textColor',
-    'bgColor': 'style_bgColor',
-    'bgOpacity': 'style_bgOpacity',
-    'bottomPos': 'style_bottomPos',
-    'leftPos': 'style_leftPos',
-    'maxHeight': 'style_maxHeight',
-    'maxWidth': 'style_maxWidth',
-    'padding': 'style_padding',
-    'borderRadius': 'style_borderRadius'
-};
-
-/**
- * Numeric field IDs that need numeric parsing
- */
-const NUMERIC_FIELDS = new Set([
-    'fontSize', 'autoHideSeconds', 'bgOpacity', 
-    'bottomPos', 'leftPos', 'maxHeight', 'maxWidth'
-]);
 
 /**
  * Collects all form values into a settings object
