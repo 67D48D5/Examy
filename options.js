@@ -5,6 +5,35 @@ import { hexToRgba } from './utils/color-utils.js';
 import { getStorageValues, setStorageValues } from './utils/chrome-helpers.js';
 
 /**
+ * Mapping between form field IDs and settings keys
+ */
+const FORM_FIELD_MAPPING = {
+    'apiKey': 'apiKey',
+    'modelName': 'modelName',
+    'baseUrl': 'gemini_baseUrl',
+    'prompt': 'gemini_prompt',
+    'fontSize': 'style_fontSize',
+    'autoHideSeconds': 'style_autoHideSeconds',
+    'textColor': 'style_textColor',
+    'bgColor': 'style_bgColor',
+    'bgOpacity': 'style_bgOpacity',
+    'bottomPos': 'style_bottomPos',
+    'leftPos': 'style_leftPos',
+    'maxHeight': 'style_maxHeight',
+    'maxWidth': 'style_maxWidth',
+    'padding': 'style_padding',
+    'borderRadius': 'style_borderRadius'
+};
+
+/**
+ * Numeric field IDs that need numeric parsing
+ */
+const NUMERIC_FIELDS = new Set([
+    'fontSize', 'autoHideSeconds', 'bgOpacity', 
+    'bottomPos', 'leftPos', 'maxHeight', 'maxWidth'
+]);
+
+/**
  * Saves options to storage
  */
 function saveOptions() {
@@ -30,7 +59,7 @@ function saveOptions() {
             showStatusMessage('Failed to save settings!', 'error');
         })
         .finally(() => {
-            if (saveButton) saveButton.disabled = false;
+            saveButton.disabled = false;
         });
 }
 
@@ -40,12 +69,11 @@ function saveOptions() {
  * @returns {boolean} True if valid
  */
 function validateSettings(settings) {
-    // Check numeric values are not NaN
-    const numericKeys = ['style_fontSize', 'style_autoHideSeconds', 'style_bgOpacity',
-        'style_bottomPos', 'style_leftPos', 'style_maxHeight', 'style_maxWidth'];
-
-    for (const key of numericKeys) {
-        if (isNaN(settings[key]) || !isFinite(settings[key])) {
+    // Check numeric values are not NaN using the same set
+    for (const fieldId of NUMERIC_FIELDS) {
+        const settingsKey = FORM_FIELD_MAPPING[fieldId];
+        const value = settings[settingsKey];
+        if (isNaN(value) || !isFinite(value)) {
             return false;
         }
     }
@@ -63,25 +91,18 @@ function validateSettings(settings) {
  * @returns {Object} Settings object
  */
 function collectFormValues() {
-    const getValue = (id) => document.getElementById(id)?.value || '';
+    const settings = {};
 
-    return {
-        apiKey: getValue('apiKey'),
-        modelName: getValue('modelName'),
-        gemini_baseUrl: getValue('baseUrl'),
-        gemini_prompt: getValue('prompt'),
-        style_fontSize: getNumberValue('fontSize', DEFAULT_SETTINGS.style_fontSize),
-        style_autoHideSeconds: getNumberValue('autoHideSeconds', DEFAULT_SETTINGS.style_autoHideSeconds),
-        style_textColor: getValue('textColor'),
-        style_bgColor: getValue('bgColor'),
-        style_bgOpacity: getNumberValue('bgOpacity', DEFAULT_SETTINGS.style_bgOpacity),
-        style_bottomPos: getNumberValue('bottomPos', DEFAULT_SETTINGS.style_bottomPos),
-        style_leftPos: getNumberValue('leftPos', DEFAULT_SETTINGS.style_leftPos),
-        style_maxHeight: getNumberValue('maxHeight', DEFAULT_SETTINGS.style_maxHeight),
-        style_maxWidth: getNumberValue('maxWidth', DEFAULT_SETTINGS.style_maxWidth),
-        style_padding: getValue('padding'),
-        style_borderRadius: getValue('borderRadius')
-    };
+    for (const [fieldId, settingsKey] of Object.entries(FORM_FIELD_MAPPING)) {
+        if (NUMERIC_FIELDS.has(fieldId)) {
+            settings[settingsKey] = getNumberValue(fieldId, DEFAULT_SETTINGS[settingsKey]);
+        } else {
+            const element = document.getElementById(fieldId);
+            settings[settingsKey] = element?.value || '';
+        }
+    }
+
+    return settings;
 }
 
 /**
@@ -89,26 +110,12 @@ function collectFormValues() {
  * @param {Object} items - Settings to apply to form
  */
 function setFormValues(items) {
-    const setValue = (id, value) => {
-        const element = document.getElementById(id);
-        if (element) element.value = value;
-    };
-
-    setValue('apiKey', items.apiKey);
-    setValue('modelName', items.modelName);
-    setValue('baseUrl', items.gemini_baseUrl);
-    setValue('prompt', items.gemini_prompt);
-    setValue('fontSize', items.style_fontSize);
-    setValue('autoHideSeconds', items.style_autoHideSeconds);
-    setValue('textColor', items.style_textColor);
-    setValue('bgColor', items.style_bgColor);
-    setValue('bgOpacity', items.style_bgOpacity);
-    setValue('bottomPos', items.style_bottomPos);
-    setValue('leftPos', items.style_leftPos);
-    setValue('maxHeight', items.style_maxHeight);
-    setValue('maxWidth', items.style_maxWidth);
-    setValue('padding', items.style_padding);
-    setValue('borderRadius', items.style_borderRadius);
+    for (const [fieldId, settingsKey] of Object.entries(FORM_FIELD_MAPPING)) {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            element.value = items[settingsKey];
+        }
+    }
 
     updatePreview();
 }

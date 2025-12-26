@@ -1,6 +1,6 @@
 // background.js
 
-import { COMMANDS, MESSAGE_TYPES, LOG_PREFIX, DEFAULT_SETTINGS } from './utils/constants.js';
+import { COMMANDS, MESSAGE_TYPES, LOG_PREFIX } from './utils/constants.js';
 import { getActiveTab, injectContentScript, sendMessageToTab } from './utils/chrome-helpers.js';
 import { captureVisibleTab } from './services/capture-service.js';
 import { queryGeminiWithImage } from './services/gemini-service.js';
@@ -84,10 +84,3 @@ async function notifyError(tabId, errorMessage) {
         text: errorMessage
     });
 }
-
-// Provide default settings to content scripts on request
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request?.type === 'GET_DEFAULT_SETTINGS') {
-        sendResponse({ defaults: DEFAULT_SETTINGS });
-    }
-});

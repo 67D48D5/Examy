@@ -94,7 +94,7 @@ if (typeof window.examyInjected === 'undefined') {
         function setupAutoHide(autoHideSeconds) {
             const autoHideMs = Number(autoHideSeconds) * 1000;
 
-            if (autoHideMs > 0 && !isNaN(autoHideMs)) {
+            if (!isNaN(autoHideMs) && autoHideMs > 0) {
                 setTimeout(() => {
                     removeOverlay();
                 }, autoHideMs);
@@ -117,8 +117,11 @@ if (typeof window.examyInjected === 'undefined') {
                 return;
             }
 
-            // Toggle display without computing current style
-            overlay.style.display = overlay.style.display === "none" ? "block" : "none";
+            // Check the computed style to get the actual display value
+            const currentStyle = window.getComputedStyle(overlay).display;
+
+            // Toggle display based on current style
+            overlay.style.display = currentStyle === "none" ? "block" : "none";
         }
 
         // Message Handler

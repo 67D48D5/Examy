@@ -13,7 +13,7 @@ export async function queryGeminiWithImage(dataUrl) {
     const storageData = await getStorageValues(['apiKey', 'modelName', 'gemini_baseUrl', 'gemini_prompt']);
     const apiKey = storageData.apiKey;
     const modelName = storageData.modelName || GEMINI_CONFIG.defaultModel;
-    const baseUrl = storageData.gemini_baseUrl?.replace(/\/$/, '') || GEMINI_CONFIG.baseUrl?.replace(/\/$/, '') || '';
+    const baseUrl = (storageData.gemini_baseUrl || GEMINI_CONFIG.baseUrl || '').replace(/\/$/, '');
     const prompt = storageData.gemini_prompt?.trim() || GEMINI_CONFIG.defaultPrompt;
 
     // Validate API key

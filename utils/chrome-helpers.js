@@ -55,7 +55,7 @@ export async function getStorageValues(keys) {
  * @returns {Promise<void>}
  */
 export async function setStorageValues(items) {
-    return await chrome.storage.local.set(items);
+    return chrome.storage.local.set(items);
 }
 
 /**
