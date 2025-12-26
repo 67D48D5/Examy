@@ -1,4 +1,4 @@
-// content.js - Content script for overlay display
+// content.js
 
 if (typeof window.examyInjected === 'undefined') {
     window.examyInjected = true;
@@ -17,21 +17,27 @@ if (typeof window.examyInjected === 'undefined') {
         const DEFAULT_SETTINGS = {
             apiKey: '',
             modelName: 'gemini-2.5-flash',
-            style_fontSize: 14,
-            style_autoHideSeconds: 10,
-            style_textColor: '#FFFFFF',
-            style_bgColor: '#000000',
+            gemini_baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
+            gemini_prompt: "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on. If there are no problems, respond with 'No problems found.' Respond in the language used in the image. Answer in plain text without any additional formatting.",
+            style_fontSize: 12,
+            style_autoHideSeconds: 0,
+            style_textColor: '#e8e8e8',
+            style_bgColor: '#ffffff',
             style_bgOpacity: 80,
-            style_bottomPos: 20,
-            style_leftPos: 20,
-            style_maxHeight: 300,
-            style_maxWidth: 400,
+            style_bottomPos: 458,
+            style_leftPos: 384,
+            style_maxHeight: 384,
+            style_maxWidth: 384,
             style_padding: '10px 15px',
             style_borderRadius: '8px'
         };
 
+        async function loadSettings() {
+            return chrome.storage.local.get(DEFAULT_SETTINGS);
+        }
+
         // Utility: Convert hex color to RGBA
-        function hexToRgba(hex, opacityPercent) {
+        function hexToRgba(hex, opacityPercent = 80) {
             let r = 0, g = 0, b = 0;
             if (hex.length === 4) {
                 r = parseInt(hex[1] + hex[1], 16);
@@ -42,7 +48,8 @@ if (typeof window.examyInjected === 'undefined') {
                 g = parseInt(hex[3] + hex[4], 16);
                 b = parseInt(hex[5] + hex[6], 16);
             }
-            const alpha = (Number(opacityPercent) || 80) / 100;
+            const alpha = Math.max(0, Math.min(1, opacityPercent / 100));
+
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
@@ -58,7 +65,9 @@ if (typeof window.examyInjected === 'undefined') {
             const overlay = document.createElement('div');
             overlay.id = OVERLAY_CONFIG.id;
             overlay.textContent = text;
+
             applyOverlayStyles(overlay, settings);
+
             return overlay;
         }
 
@@ -84,7 +93,8 @@ if (typeof window.examyInjected === 'undefined') {
 
         function setupAutoHide(autoHideSeconds) {
             const autoHideMs = Number(autoHideSeconds) * 1000;
-            if (autoHideMs > 0) {
+
+            if (autoHideMs > 0 && !isNaN(autoHideMs)) {
                 setTimeout(() => {
                     removeOverlay();
                 }, autoHideMs);
@@ -92,36 +102,45 @@ if (typeof window.examyInjected === 'undefined') {
         }
 
         async function showOverlay(text) {
-            const settings = await chrome.storage.local.get(DEFAULT_SETTINGS);
+            const settings = await loadSettings();
             removeOverlay();
+
             const overlay = createOverlayElement(text, settings);
             document.body.appendChild(overlay);
             setupAutoHide(settings.style_autoHideSeconds);
         }
 
-        function toggleOverlay() {
+        async function toggleOverlay() {
             const overlay = document.getElementById(OVERLAY_CONFIG.id);
             if (!overlay) {
-                showOverlay("[INFO] Examy Overlay\nPress the shortcut again to hide this overlay.");
+                await showOverlay("[INFO] Examy Overlay\nPress the shortcut again to hide this overlay.");
                 return;
             }
-            const currentStyle = window.getComputedStyle(overlay).display;
-            overlay.style.display = currentStyle === "none" ? "" : "none";
+
+            // Toggle display without computing current style
+            overlay.style.display = overlay.style.display === "none" ? "block" : "none";
         }
 
         // Message Handler
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.type === 'PING') {
                 sendResponse({ status: 'pong' });
-                return;
+                return false;
             }
 
             if (request.type === MESSAGE_TYPES.DISPLAY_RESULT) {
-                showOverlay(request.text);
+                showOverlay(request.text)
+                    .then(() => sendResponse({ status: 'displayed' }))
+                    .catch(err => sendResponse({ status: 'error', error: err.message }));
+                return true; // Keep message channel open for async response
             } else if (request.type === MESSAGE_TYPES.TOGGLE_OVERLAY) {
-                toggleOverlay();
-                sendResponse({ status: "toggled" });
+                toggleOverlay()
+                    .then(() => sendResponse({ status: "toggled" }))
+                    .catch(err => sendResponse({ status: 'error', error: err.message }));
+                return true; // Keep message channel open for async response
             }
+
+            return false;
         });
     })();
 }

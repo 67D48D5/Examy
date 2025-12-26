@@ -3,10 +3,10 @@
 /**
  * Converts a hex color code to RGBA string with opacity
  * @param {string} hex - Hex color code (e.g., '#FF0033' or '#F03')
- * @param {number} opacityPercent - Opacity percentage (0-100)
+ * @param {number} opacityPercent - Opacity percentage (0-100), defaults to 80
  * @returns {string} RGBA color string
  */
-export function hexToRgba(hex, opacityPercent) {
+export function hexToRgba(hex, opacityPercent = 80) {
     let r = 0, g = 0, b = 0;
 
     // Handle 3-digit hex code (#F03)
@@ -22,8 +22,8 @@ export function hexToRgba(hex, opacityPercent) {
         b = parseInt(hex[5] + hex[6], 16);
     }
 
-    // Convert opacity from percentage to decimal
-    const alpha = (Number(opacityPercent) || 80) / 100;
+    // Convert opacity from percentage to decimal and clamp between 0 and 1
+    const alpha = Math.max(0, Math.min(1, opacityPercent / 100));
 
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }

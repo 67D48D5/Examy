@@ -1,4 +1,4 @@
-// gemini-service.js - Gemini API integration logic
+// gemini-service.js
 
 import { GEMINI_CONFIG, NOTIFICATION_IDS, LOG_PREFIX } from '../utils/constants.js';
 import { getStorageValues, createNotification, openOptionsPage } from '../utils/chrome-helpers.js';
@@ -10,9 +10,11 @@ import { getStorageValues, createNotification, openOptionsPage } from '../utils/
  */
 export async function queryGeminiWithImage(dataUrl) {
     // Retrieve API key and model name from storage
-    const storageData = await getStorageValues(['apiKey', 'modelName']);
+    const storageData = await getStorageValues(['apiKey', 'modelName', 'gemini_baseUrl', 'gemini_prompt']);
     const apiKey = storageData.apiKey;
     const modelName = storageData.modelName || GEMINI_CONFIG.defaultModel;
+    const baseUrl = storageData.gemini_baseUrl?.replace(/\/$/, '') || GEMINI_CONFIG.baseUrl?.replace(/\/$/, '') || '';
+    const prompt = storageData.gemini_prompt?.trim() || GEMINI_CONFIG.defaultPrompt;
 
     // Validate API key
     if (!apiKey) {
@@ -22,12 +24,12 @@ export async function queryGeminiWithImage(dataUrl) {
     }
 
     // Prepare request body
-    const requestBody = buildGeminiRequest(dataUrl, GEMINI_CONFIG.defaultPrompt);
+    const requestBody = buildGeminiRequest(dataUrl, prompt);
 
     // Make API call
     try {
         const response = await fetch(
-            `${GEMINI_CONFIG.baseUrl}/${modelName}:generateContent?key=${apiKey}`,
+            `${baseUrl}/${modelName}:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -42,18 +44,14 @@ export async function queryGeminiWithImage(dataUrl) {
             return `Error: ${result.error?.message || 'API call failed'}`;
         }
 
-        // Validate response structure
-        if (!result.candidates || 
-            !result.candidates[0] || 
-            !result.candidates[0].content || 
-            !result.candidates[0].content.parts || 
-            !result.candidates[0].content.parts[0] || 
-            !result.candidates[0].content.parts[0].text) {
+        // Extract response text using optional chaining
+        const geminiText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!geminiText) {
             console.error(`${LOG_PREFIX.ERROR} Unexpected Gemini API response structure:`, result);
             return 'Error: Unexpected API response format';
         }
 
-        const geminiText = result.candidates[0].content.parts[0].text;
         console.log(`${LOG_PREFIX.INFO} Gemini response:\n${geminiText}`);
 
         return `${LOG_PREFIX.INFO} Query response:\n${geminiText}`;

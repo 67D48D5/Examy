@@ -1,4 +1,4 @@
-// overlay-manager.js - Overlay display and management logic
+// overlay-manager.js
 
 import { OVERLAY_CONFIG, DEFAULT_SETTINGS } from '../utils/constants.js';
 import { hexToRgba } from '../utils/color-utils.js';
@@ -17,7 +17,7 @@ export async function showOverlay(text) {
 
     // Create and configure overlay element
     const overlay = createOverlayElement(text, settings);
-    
+
     // Append to document
     document.body.appendChild(overlay);
 
@@ -41,7 +41,7 @@ export function toggleOverlay() {
     const currentStyle = window.getComputedStyle(overlay).display;
 
     // Toggle display based on current style
-    overlay.style.display = currentStyle === "none" ? "" : "none";
+    overlay.style.display = currentStyle === "none" ? "block" : "none";
 }
 
 /**
@@ -49,9 +49,7 @@ export function toggleOverlay() {
  */
 export function removeOverlay() {
     const existingOverlay = document.getElementById(OVERLAY_CONFIG.id);
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
+    existingOverlay?.remove();
 }
 
 /**
@@ -72,27 +70,38 @@ function createOverlayElement(text, settings) {
 }
 
 /**
+ * Validates and returns a safe numeric value
+ * @param {any} value - Value to validate
+ * @param {number} fallback - Fallback value if invalid
+ * @returns {number} Valid numeric value
+ */
+function safeNumber(value, fallback) {
+    const num = Number(value);
+    return !isNaN(num) && isFinite(num) ? num : fallback;
+}
+
+/**
  * Applies all style settings to the overlay element
  * @param {HTMLElement} overlay - The overlay element
  * @param {Object} settings - Style settings object
  */
 function applyOverlayStyles(overlay, settings) {
     overlay.style.position = 'fixed';
-    overlay.style.bottom = `${settings.style_bottomPos}px`;
-    overlay.style.left = `${settings.style_leftPos}px`;
+    overlay.style.bottom = `${safeNumber(settings.style_bottomPos, DEFAULT_SETTINGS.style_bottomPos)}px`;
+    overlay.style.left = `${safeNumber(settings.style_leftPos, DEFAULT_SETTINGS.style_leftPos)}px`;
     overlay.style.backgroundColor = hexToRgba(
-        settings.style_bgColor,
-        settings.style_bgOpacity
+        settings.style_bgColor || DEFAULT_SETTINGS.style_bgColor,
+        safeNumber(settings.style_bgOpacity, DEFAULT_SETTINGS.style_bgOpacity)
     );
-    overlay.style.color = settings.style_textColor;
-    overlay.style.padding = settings.style_padding;
-    overlay.style.borderRadius = settings.style_borderRadius;
-    overlay.style.fontSize = `${settings.style_fontSize}px`;
+    overlay.style.color = settings.style_textColor || DEFAULT_SETTINGS.style_textColor;
+    overlay.style.padding = settings.style_padding || DEFAULT_SETTINGS.style_padding;
+    overlay.style.borderRadius = settings.style_borderRadius || DEFAULT_SETTINGS.style_borderRadius;
+    overlay.style.fontSize = `${safeNumber(settings.style_fontSize, DEFAULT_SETTINGS.style_fontSize)}px`;
     overlay.style.fontFamily = 'sans-serif';
     overlay.style.zIndex = OVERLAY_CONFIG.zIndex;
-    overlay.style.maxWidth = `${settings.style_maxWidth}px`;
+    overlay.style.maxWidth = `${safeNumber(settings.style_maxWidth, DEFAULT_SETTINGS.style_maxWidth)}px`;
     overlay.style.whiteSpace = 'pre-wrap';
-    overlay.style.maxHeight = `${settings.style_maxHeight}px`;
+    overlay.style.maxHeight = `${safeNumber(settings.style_maxHeight, DEFAULT_SETTINGS.style_maxHeight)}px`;
     overlay.style.overflowY = 'auto';
 }
 
@@ -102,8 +111,8 @@ function applyOverlayStyles(overlay, settings) {
  */
 function setupAutoHide(autoHideSeconds) {
     const autoHideMs = Number(autoHideSeconds) * 1000;
-    
-    if (autoHideMs > 0) {
+
+    if (!isNaN(autoHideMs) && autoHideMs > 0) {
         setTimeout(() => {
             removeOverlay();
         }, autoHideMs);

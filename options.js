@@ -1,4 +1,4 @@
-// options.js - Options page logic
+// options.js
 
 import { DEFAULT_SETTINGS } from './utils/constants.js';
 import { hexToRgba } from './utils/color-utils.js';
@@ -10,9 +10,52 @@ import { getStorageValues, setStorageValues } from './utils/chrome-helpers.js';
 function saveOptions() {
     const settings = collectFormValues();
 
-    setStorageValues(settings).then(() => {
-        showStatusMessage('Settings saved!');
-    });
+    // Validate settings before saving
+    if (!validateSettings(settings)) {
+        showStatusMessage('Invalid settings. Please check your inputs.', 'error');
+        return;
+    }
+
+    const saveButton = document.getElementById('saveButton');
+    if (!saveButton) return;
+
+    saveButton.disabled = true;
+
+    setStorageValues(settings)
+        .then(() => {
+            showStatusMessage('Settings saved!', 'success');
+        })
+        .catch((error) => {
+            console.error('Failed to save settings:', error);
+            showStatusMessage('Failed to save settings!', 'error');
+        })
+        .finally(() => {
+            if (saveButton) saveButton.disabled = false;
+        });
+}
+
+/**
+ * Validates settings object
+ * @param {Object} settings - Settings to validate
+ * @returns {boolean} True if valid
+ */
+function validateSettings(settings) {
+    // Check numeric values are not NaN
+    const numericKeys = ['style_fontSize', 'style_autoHideSeconds', 'style_bgOpacity',
+        'style_bottomPos', 'style_leftPos', 'style_maxHeight', 'style_maxWidth'];
+
+    for (const key of numericKeys) {
+        if (isNaN(settings[key]) || !isFinite(settings[key])) {
+            return false;
+        }
+    }
+
+    // Validate opacity range
+    if (settings.style_bgOpacity < 0 || settings.style_bgOpacity > 100) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -20,18 +63,24 @@ function saveOptions() {
  * @returns {Object} Settings object
  */
 function collectFormValues() {
+    const getValue = (id) => document.getElementById(id)?.value || '';
+
     return {
-        apiKey: document.getElementById('apiKey').value,
-        modelName: document.getElementById('modelName').value,
-        style_fontSize: Number(document.getElementById('fontSize').value),
-        style_autoHideSeconds: Number(document.getElementById('autoHideSeconds').value),
-        style_textColor: document.getElementById('textColor').value,
-        style_bgColor: document.getElementById('bgColor').value,
-        style_bgOpacity: Number(document.getElementById('bgOpacity').value),
-        style_bottomPos: Number(document.getElementById('bottomPos').value),
-        style_leftPos: Number(document.getElementById('leftPos').value),
-        style_maxHeight: Number(document.getElementById('maxHeight').value),
-        style_maxWidth: Number(document.getElementById('maxWidth').value)
+        apiKey: getValue('apiKey'),
+        modelName: getValue('modelName'),
+        gemini_baseUrl: getValue('baseUrl'),
+        gemini_prompt: getValue('prompt'),
+        style_fontSize: getNumberValue('fontSize', DEFAULT_SETTINGS.style_fontSize),
+        style_autoHideSeconds: getNumberValue('autoHideSeconds', DEFAULT_SETTINGS.style_autoHideSeconds),
+        style_textColor: getValue('textColor'),
+        style_bgColor: getValue('bgColor'),
+        style_bgOpacity: getNumberValue('bgOpacity', DEFAULT_SETTINGS.style_bgOpacity),
+        style_bottomPos: getNumberValue('bottomPos', DEFAULT_SETTINGS.style_bottomPos),
+        style_leftPos: getNumberValue('leftPos', DEFAULT_SETTINGS.style_leftPos),
+        style_maxHeight: getNumberValue('maxHeight', DEFAULT_SETTINGS.style_maxHeight),
+        style_maxWidth: getNumberValue('maxWidth', DEFAULT_SETTINGS.style_maxWidth),
+        style_padding: getValue('padding'),
+        style_borderRadius: getValue('borderRadius')
     };
 }
 
@@ -40,17 +89,26 @@ function collectFormValues() {
  * @param {Object} items - Settings to apply to form
  */
 function setFormValues(items) {
-    document.getElementById('apiKey').value = items.apiKey;
-    document.getElementById('modelName').value = items.modelName;
-    document.getElementById('fontSize').value = items.style_fontSize;
-    document.getElementById('autoHideSeconds').value = items.style_autoHideSeconds;
-    document.getElementById('textColor').value = items.style_textColor;
-    document.getElementById('bgColor').value = items.style_bgColor;
-    document.getElementById('bgOpacity').value = items.style_bgOpacity;
-    document.getElementById('bottomPos').value = items.style_bottomPos;
-    document.getElementById('leftPos').value = items.style_leftPos;
-    document.getElementById('maxHeight').value = items.style_maxHeight;
-    document.getElementById('maxWidth').value = items.style_maxWidth;
+    const setValue = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.value = value;
+    };
+
+    setValue('apiKey', items.apiKey);
+    setValue('modelName', items.modelName);
+    setValue('baseUrl', items.gemini_baseUrl);
+    setValue('prompt', items.gemini_prompt);
+    setValue('fontSize', items.style_fontSize);
+    setValue('autoHideSeconds', items.style_autoHideSeconds);
+    setValue('textColor', items.style_textColor);
+    setValue('bgColor', items.style_bgColor);
+    setValue('bgOpacity', items.style_bgOpacity);
+    setValue('bottomPos', items.style_bottomPos);
+    setValue('leftPos', items.style_leftPos);
+    setValue('maxHeight', items.style_maxHeight);
+    setValue('maxWidth', items.style_maxWidth);
+    setValue('padding', items.style_padding);
+    setValue('borderRadius', items.style_borderRadius);
 
     updatePreview();
 }
@@ -59,9 +117,15 @@ function setFormValues(items) {
  * Restores options from storage
  */
 function restoreOptions() {
-    getStorageValues(DEFAULT_SETTINGS).then((items) => {
-        setFormValues(items);
-    });
+    getStorageValues(DEFAULT_SETTINGS)
+        .then((items) => {
+            setFormValues(items);
+        })
+        .catch((error) => {
+            console.error('Failed to restore settings:', error);
+            // Fall back to defaults on error
+            setFormValues(DEFAULT_SETTINGS);
+        });
 }
 
 /**
@@ -75,44 +139,57 @@ function resetOptions() {
 }
 
 /**
+ * Gets a numeric value from input, with validation
+ * @param {string} id - Input element ID
+ * @param {number} fallback - Fallback value if invalid
+ * @returns {number} Valid numeric value
+ */
+function getNumberValue(id, fallback) {
+    const element = document.getElementById(id);
+    if (!element) return fallback;
+
+    const raw = element.value;
+    if (raw === '' || raw === null || raw === undefined) return fallback;
+
+    const num = Number(raw);
+    return !isNaN(num) && isFinite(num) ? num : fallback;
+}
+
+/**
  * Updates the preview overlay with current form values
  */
 function updatePreview() {
     const preview = document.getElementById('previewOverlay');
     if (!preview) return;
 
-    // Get current input values (use default if empty)
-    const fontSize = document.getElementById('fontSize').value || DEFAULT_SETTINGS.style_fontSize;
-    const textColor = document.getElementById('textColor').value || DEFAULT_SETTINGS.style_textColor;
-    const bgColor = document.getElementById('bgColor').value || DEFAULT_SETTINGS.style_bgColor;
-    const bgOpacity = document.getElementById('bgOpacity').value || DEFAULT_SETTINGS.style_bgOpacity;
-    const bottomPos = document.getElementById('bottomPos').value || DEFAULT_SETTINGS.style_bottomPos;
-    const leftPos = document.getElementById('leftPos').value || DEFAULT_SETTINGS.style_leftPos;
-    const maxHeight = document.getElementById('maxHeight').value || DEFAULT_SETTINGS.style_maxHeight;
-    const maxWidth = document.getElementById('maxWidth').value || DEFAULT_SETTINGS.style_maxWidth;
+    const settings = collectFormValues();
 
     // Apply styles to preview
-    preview.style.fontSize = `${fontSize}px`;
-    preview.style.color = textColor;
-    preview.style.backgroundColor = hexToRgba(bgColor, bgOpacity);
-    preview.style.bottom = `${bottomPos}px`;
-    preview.style.left = `${leftPos}px`;
-    preview.style.maxHeight = `${maxHeight}px`;
-    preview.style.maxWidth = `${maxWidth}px`;
+    preview.style.fontSize = `${settings.style_fontSize}px`;
+    preview.style.color = settings.style_textColor;
+    preview.style.backgroundColor = hexToRgba(settings.style_bgColor, settings.style_bgOpacity);
+    preview.style.bottom = `${settings.style_bottomPos}px`;
+    preview.style.left = `${settings.style_leftPos}px`;
+    preview.style.maxHeight = `${settings.style_maxHeight}px`;
+    preview.style.maxWidth = `${settings.style_maxWidth}px`;
+    preview.style.padding = settings.style_padding;
+    preview.style.borderRadius = settings.style_borderRadius;
 }
 
 /**
  * Shows a status message temporarily
  * @param {string} message - Message to display
+ * @param {string} type - Message type: 'success' or 'error'
  */
-function showStatusMessage(message) {
+function showStatusMessage(message, type = 'success') {
     const status = document.getElementById('status');
     status.textContent = message;
-    status.classList.add('show');
+    status.classList.remove('success', 'error');
+    status.classList.add('show', type);
 
     setTimeout(() => {
         status.classList.remove('show');
-    }, 2000);
+    }, 2500);
 }
 
 /**

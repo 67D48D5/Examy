@@ -1,16 +1,20 @@
-// background.js - Background service worker for command handling
+// background.js
 
-import { COMMANDS, MESSAGE_TYPES, LOG_PREFIX } from './utils/constants.js';
+import { COMMANDS, MESSAGE_TYPES, LOG_PREFIX, DEFAULT_SETTINGS } from './utils/constants.js';
 import { getActiveTab, injectContentScript, sendMessageToTab } from './utils/chrome-helpers.js';
 import { captureVisibleTab } from './services/capture-service.js';
 import { queryGeminiWithImage } from './services/gemini-service.js';
 
 // Command listener
 chrome.commands.onCommand.addListener(async (command) => {
-    if (command === COMMANDS.TOGGLE_OVERLAY) {
-        await handleToggleOverlay();
-    } else if (command === COMMANDS.CAPTURE_AND_QUERY) {
-        await handleCaptureAndQuery();
+    try {
+        if (command === COMMANDS.TOGGLE_OVERLAY) {
+            await handleToggleOverlay();
+        } else if (command === COMMANDS.CAPTURE_AND_QUERY) {
+            await handleCaptureAndQuery();
+        }
+    } catch (error) {
+        console.error(`${LOG_PREFIX.ERROR} Command execution failed:`, error);
     }
 });
 
@@ -21,10 +25,8 @@ async function handleToggleOverlay() {
     const tab = await getActiveTab();
     if (!tab) return;
 
-    // Inject content script if needed
+    // Inject content script if needed, then send toggle message
     await injectContentScript(tab.id, ['content.js']);
-
-    // Send toggle message
     await sendMessageToTab(tab.id, { type: MESSAGE_TYPES.TOGGLE_OVERLAY });
 }
 
@@ -82,3 +84,10 @@ async function notifyError(tabId, errorMessage) {
         text: errorMessage
     });
 }
+
+// Provide default settings to content scripts on request
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request?.type === 'GET_DEFAULT_SETTINGS') {
+        sendResponse({ defaults: DEFAULT_SETTINGS });
+    }
+});

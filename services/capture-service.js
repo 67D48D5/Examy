@@ -1,4 +1,4 @@
-// capture-service.js - Screen capture logic
+// capture-service.js
 
 import { LOG_PREFIX } from '../utils/constants.js';
 
@@ -11,9 +11,11 @@ export async function captureVisibleTab(windowId) {
     try {
         const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: "jpeg" });
         console.log(`${LOG_PREFIX.INFO} Captured page image (Data URL):`, dataUrl);
+
         return dataUrl;
     } catch (error) {
         console.error(`${LOG_PREFIX.ERROR} Capture failed:`, error);
+
         return null;
     }
 }

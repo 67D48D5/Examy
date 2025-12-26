@@ -1,4 +1,4 @@
-// chrome-helpers.js - Chrome API helper utilities
+// chrome-helpers.js
 
 /**
  * Gets the currently active tab
@@ -17,11 +17,15 @@ export async function getActiveTab() {
  */
 export async function injectContentScript(tabId, files) {
     try {
+        // Check if content script is already injected
         await chrome.tabs.sendMessage(tabId, { type: 'PING' });
+
+        // If successful, script is already injected -> no action needed
     } catch (error) {
+        // Script not injected, inject it now
         await chrome.scripting.executeScript({
             target: { tabId },
-            files: files
+            files
         });
     }
 }
@@ -42,7 +46,7 @@ export async function sendMessageToTab(tabId, message) {
  * @returns {Promise<Object>} Retrieved values
  */
 export async function getStorageValues(keys) {
-    return await chrome.storage.local.get(keys);
+    return chrome.storage.local.get(keys);
 }
 
 /**
@@ -69,5 +73,5 @@ export async function createNotification(notificationId, options) {
  * @returns {Promise<void>}
  */
 export async function openOptionsPage() {
-    chrome.runtime.openOptionsPage();
+    return chrome.runtime.openOptionsPage();
 }
