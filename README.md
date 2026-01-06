@@ -4,9 +4,9 @@ Quietly powerful exam helper chrome extension.
 
 ## Overview
 
-Examy is a Chrome extension that captures screenshots and queries the Gemini AI API for answers.
+Examy is a Chrome extension that captures screenshots and queries the LLM API for answers.
 
-> Just press `Ctrl + Shift + E` (`Cmd + Shift + E`) to query entire chrome tab screenshot to `Gemini`.
+> Just press `Ctrl + Shift + E` (`Cmd + Shift + E`) to query entire chrome tab screenshot to `LLM`.
 
 ## Key Features
 
@@ -22,21 +22,21 @@ Examy is a Chrome extension that captures screenshots and queries the Gemini AI 
 
 ```shell
 Examy/
-├── background.js          # Background service worker (entry point)
-├── content.js            # Content script (injected into pages)
-├── options.js            # Options page logic
-├── options.html          # Options page UI
-├── manifest.json         # Extension manifest
-├── services/            # Business logic services
-│   ├── capture-service.js    # Screen capture functionality
-│   └── gemini-service.js     # Gemini API integration
-├── utils/               # Shared utilities
-│   ├── constants.js          # Configuration and constants
-│   ├── color-utils.js        # Color conversion utilities
-│   └── chrome-helpers.js     # Chrome API wrappers
-├── modules/             # Feature modules (for service worker only)
-│   └── overlay-manager.js    # Overlay display logic
-└── images/              # Extension icons
+├── background.js           # Background service worker (entry point)
+├── content.js              # Content script (injected into pages)
+├── options.js              # Options page logic
+├── options.html            # Options page UI
+├── manifest.json           # Extension manifest
+├── services/               # Business logic services
+│   ├── capture-service.js  # Screen capture functionality
+│   └── query-service.js    # LLM API integration
+├── utils/                  # Shared utilities
+│   ├── constants.js        # Configuration and constants
+│   ├── color-utils.js      # Color conversion utilities
+│   └── chrome-helpers.js   # Chrome API wrappers
+├── modules/                # Feature modules (for service worker only)
+│   └── overlay-manager.js  # Overlay display logic
+└── images/                 # Extension icons
 ```
 
 ## Module Responsibilities
@@ -78,12 +78,12 @@ Examy/
   - `captureVisibleTab()`: Captures the visible tab as a JPEG image
 - **Returns**: Data URL of captured image or null on failure
 
-#### gemini-service.js
+#### querys-service.js
 
-- **Purpose**: Manages Gemini API integration
+- **Purpose**: Manages LLM API integration
 - **Key Functions**:
-  - `queryGeminiWithImage()`: Sends image to Gemini API and returns response
-  - `buildGeminiRequest()`: Constructs API request body
+  - `queryLLMWithImage()`: Sends image to LLM API and returns response
+  - `buildLLMRequest()`: Constructs API request body
   - `notifyMissingApiKey()`: Handles missing API key scenario
 - **Configuration**: Uses constants for API endpoints and prompts
 
@@ -94,7 +94,6 @@ Examy/
 - **Purpose**: Centralized configuration and constants
 - **Exports**:
   - `DEFAULT_SETTINGS`: Default extension settings
-  - `GEMINI_CONFIG`: Gemini API configuration
   - `OVERLAY_CONFIG`: Overlay display configuration
   - `MESSAGE_TYPES`: Message type constants
   - `COMMANDS`: Command name constants
@@ -129,7 +128,7 @@ Examy/
    - Injects `content.js` into the tab
    - Calls `capture-service` to capture screenshot
    - Sends "querying..." message to content script
-   - Calls `gemini-service` to query API
+   - Calls `query-service` to query API
    - Sends result to content script for display
 4. `content.js` receives message and displays overlay
 
