@@ -1,7 +1,7 @@
 // background.js
 
 import { COMMANDS, MESSAGE_TYPES, LOG_PREFIX, DEFAULT_SETTINGS } from './utils/constants.js';
-import { getActiveTab, injectContentScript, sendMessageToTab, getStorageValues } from './utils/chrome-helpers.js';
+import { getActiveTab, injectContentScript, sendMessageToTab, getStorageValues, createNotification } from './utils/chrome-helpers.js';
 import { captureVisibleTab } from './services/capture-service.js';
 import { queryLLM } from './services/query-service.js';
 
@@ -72,6 +72,13 @@ async function handleCaptureAndQuery() {
 
     } catch (error) {
         console.error(`${LOG_PREFIX.ERROR} While executing command:`, error);
+        // Notify user of top-level errors (e.g., injection failure on restricted pages)
+        await createNotification('examy-error', {
+            type: 'basic',
+            iconUrl: 'images/icon-128.png',
+            title: 'Examy Error',
+            message: error.message || 'An unexpected error occurred.'
+        });
     }
 }
 
