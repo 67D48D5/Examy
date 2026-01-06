@@ -17,8 +17,8 @@ if (typeof window.examyInjected === 'undefined') {
         const DEFAULT_SETTINGS = {
             apiKey: '',
             modelName: 'gemini-2.5-flash',
-            gemini_baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
-            gemini_prompt: "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on. If there are no problems, respond with 'No problems found.' Respond in the language used in the image. Answer in plain text without any additional formatting.",
+            baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
+            prompt: "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on. If there are no problems, respond with 'No problems found.' Respond in the language used in the image. Answer in plain text without any additional formatting.",
             style_fontSize: 12,
             style_autoHideSeconds: 0,
             style_textColor: '#e8e8e8',

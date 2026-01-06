@@ -1,9 +1,9 @@
 // background.js
 
-import { COMMANDS, MESSAGE_TYPES, LOG_PREFIX } from './utils/constants.js';
-import { getActiveTab, injectContentScript, sendMessageToTab } from './utils/chrome-helpers.js';
+import { COMMANDS, MESSAGE_TYPES, LOG_PREFIX, DEFAULT_SETTINGS } from './utils/constants.js';
+import { getActiveTab, injectContentScript, sendMessageToTab, getStorageValues } from './utils/chrome-helpers.js';
 import { captureVisibleTab } from './services/capture-service.js';
-import { queryGeminiWithImage } from './services/gemini-service.js';
+import { queryLLM } from './services/query-service.js';
 
 // Command listener
 chrome.commands.onCommand.addListener(async (command) => {
@@ -54,17 +54,20 @@ async function handleCaptureAndQuery() {
             text: `${LOG_PREFIX.INFO} Captured page and querying, please wait...`
         });
 
-        // Query Gemini
-        const geminiText = await queryGeminiWithImage(dataUrl);
-        if (!geminiText) {
-            await notifyError(tab.id, `${LOG_PREFIX.ERROR} Query to Gemini failed. Retry later.`);
+        // Get settings
+        const settings = await getStorageValues(DEFAULT_SETTINGS);
+
+        // Query LLM
+        const responseText = await queryLLM(dataUrl, settings);
+        if (!responseText) {
+            await notifyError(tab.id, `${LOG_PREFIX.ERROR} Query failed. Retry later.`);
             return;
         }
 
         // Display result
         await sendMessageToTab(tab.id, {
             type: MESSAGE_TYPES.DISPLAY_RESULT,
-            text: geminiText
+            text: responseText
         });
 
     } catch (error) {

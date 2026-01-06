@@ -1,11 +1,22 @@
 // constants.js
 
+const DEFAULT_PROMPT = "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on. If there are no problems, respond with 'No problems found.' Respond in the language used in the image. Answer in plain text without any additional formatting.";
+
 // Default settings for the extension
 export const DEFAULT_SETTINGS = {
+    provider: 'gemini',
     apiKey: '',
     modelName: 'gemini-2.5-flash',
-    gemini_baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
-    gemini_prompt: "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on. If there are no problems, respond with 'No problems found.' Respond in the language used in the image. Answer in plain text without any additional formatting.",
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
+    prompt: DEFAULT_PROMPT,
+    openai_apiKey: '',
+    openai_model: 'gpt-4o',
+    openai_baseUrl: 'https://api.openai.com/v1/chat/completions',
+    openai_prompt: DEFAULT_PROMPT,
+    custom_apiKey: '',
+    custom_model: 'llava',
+    custom_baseUrl: 'http://localhost:11434/v1/chat/completions',
+    custom_prompt: DEFAULT_PROMPT,
     style_fontSize: 12,
     style_autoHideSeconds: 0,
     style_textColor: '#e8e8e8',
@@ -17,13 +28,6 @@ export const DEFAULT_SETTINGS = {
     style_maxWidth: 384,
     style_padding: '10px 15px',
     style_borderRadius: '8px'
-};
-
-// Gemini API configuration
-export const GEMINI_CONFIG = {
-    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
-    defaultModel: 'gemini-2.5-flash',
-    defaultPrompt: "Solve the problems on this page and only provide the answers. Skip the solution process and give concise answers. If the problems are cut off, ignore them and move on. If there are no problems, respond with 'No problems found.' Respond in the language used in the image. Answer in plain text without any additional formatting."
 };
 
 // Overlay configuration

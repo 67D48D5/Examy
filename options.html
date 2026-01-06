@@ -158,6 +158,7 @@
         input[type="text"],
         input[type="number"],
         input[type="color"],
+        select,
         textarea {
             width: 100%;
             padding: 11px 12px;
@@ -182,7 +183,16 @@
             line-height: 1.5;
         }
 
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e5ecf5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
         input:focus,
+        select:focus,
         textarea:focus {
             border-color: rgba(15, 118, 110, 0.6);
             outline: none;
@@ -191,11 +201,13 @@
         }
 
         input:invalid,
+        select:invalid,
         textarea:invalid {
             border-color: rgba(239, 68, 68, 0.5);
         }
 
         input:invalid:focus,
+        select:invalid:focus,
         textarea:invalid:focus {
             border-color: rgba(239, 68, 68, 0.7);
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
@@ -320,8 +332,19 @@
 
         <div class="layout">
             <section class="panel">
-                <h2><span>🚀</span>Gemini API</h2>
+                <h2><span>🚀</span>LLM Provider</h2>
                 <div class="grid-row">
+                    <div class="form-group full-width">
+                        <label for="provider">Provider</label>
+                        <select id="provider">
+                            <option value="gemini">Google Gemini</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="custom">Custom (Local/Ollama)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="gemini-section" class="grid-row" style="margin-top: 16px;">
                     <div class="form-group full-width">
                         <label for="apiKey">API Key</label>
                         <input type="text" id="apiKey" placeholder="AIzaSy...">
@@ -342,6 +365,48 @@
                         <label for="prompt">Default Prompt</label>
                         <textarea id="prompt" placeholder="Enter the prompt sent with each image"></textarea>
                         <small>Customize the text prompt that accompanies each capture.</small>
+                    </div>
+                </div>
+
+                <div id="openai-section" class="grid-row" style="margin-top: 16px; display: none;">
+                    <div class="form-group full-width">
+                        <label for="openai_apiKey">API Key</label>
+                        <input type="text" id="openai_apiKey" placeholder="sk-...">
+                        <small>Enter your OpenAI API key.</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="openai_model">Model Name</label>
+                        <input type="text" id="openai_model" placeholder="gpt-4o">
+                        <small>e.g., gpt-4o, gpt-4-turbo</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="openai_baseUrl">Base URL</label>
+                        <input type="text" id="openai_baseUrl" placeholder="https://api.openai.com/v1/chat/completions">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="openai_prompt">Default Prompt</label>
+                        <textarea id="openai_prompt" placeholder="Enter the prompt sent with each image"></textarea>
+                    </div>
+                </div>
+
+                <div id="custom-section" class="grid-row" style="margin-top: 16px; display: none;">
+                    <div class="form-group full-width">
+                        <label for="custom_apiKey">API Key (Optional)</label>
+                        <input type="text" id="custom_apiKey" placeholder="Bearer token...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="custom_model">Model Name</label>
+                        <input type="text" id="custom_model" placeholder="llava">
+                        <small>e.g., llava, bakllava (for Ollama)</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="custom_baseUrl">Base URL</label>
+                        <input type="text" id="custom_baseUrl" placeholder="http://localhost:11434/v1/chat/completions">
+                        <small>Endpoint must support OpenAI Chat Completions format.</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="custom_prompt">Default Prompt</label>
+                        <textarea id="custom_prompt" placeholder="Enter the prompt sent with each image"></textarea>
                     </div>
                 </div>
             </section>

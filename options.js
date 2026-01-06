@@ -8,10 +8,19 @@ import { getStorageValues, setStorageValues } from './utils/chrome-helpers.js';
  * Mapping between form field IDs and settings keys
  */
 const FORM_FIELD_MAPPING = {
+    'provider': 'provider',
     'apiKey': 'apiKey',
     'modelName': 'modelName',
-    'baseUrl': 'gemini_baseUrl',
-    'prompt': 'gemini_prompt',
+    'baseUrl': 'baseUrl',
+    'prompt': 'prompt',
+    'openai_apiKey': 'openai_apiKey',
+    'openai_model': 'openai_model',
+    'openai_baseUrl': 'openai_baseUrl',
+    'openai_prompt': 'openai_prompt',
+    'custom_apiKey': 'custom_apiKey',
+    'custom_model': 'custom_model',
+    'custom_baseUrl': 'custom_baseUrl',
+    'custom_prompt': 'custom_prompt',
     'fontSize': 'style_fontSize',
     'autoHideSeconds': 'style_autoHideSeconds',
     'textColor': 'style_textColor',
@@ -117,6 +126,7 @@ function setFormValues(items) {
         }
     }
 
+    updateProviderVisibility();
     updatePreview();
 }
 
@@ -206,11 +216,32 @@ function initializeEventListeners() {
     document.getElementById('saveButton').addEventListener('click', saveOptions);
     document.getElementById('resetButton').addEventListener('click', resetOptions);
 
+    const providerSelect = document.getElementById('provider');
+    if (providerSelect) {
+        providerSelect.addEventListener('change', updateProviderVisibility);
+    }
+
     // Update preview whenever style-related inputs change
     const styleInputs = document.querySelectorAll('.style-input');
     styleInputs.forEach(input => {
         input.addEventListener('input', updatePreview);
     });
+}
+
+/**
+ * Updates the visibility of provider-specific sections
+ */
+function updateProviderVisibility() {
+    const provider = document.getElementById('provider')?.value || 'gemini';
+
+    const toggle = (id, show) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = show ? 'block' : 'none';
+    };
+
+    toggle('gemini-section', provider === 'gemini');
+    toggle('openai-section', provider === 'openai');
+    toggle('custom-section', provider === 'custom');
 }
 
 // Initialize when DOM is ready
