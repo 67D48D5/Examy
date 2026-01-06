@@ -62,13 +62,27 @@ if (typeof window.examyInjected === 'undefined') {
         }
 
         function createOverlayElement(text, settings) {
+            // Create Host element
+            const host = document.createElement('div');
+            host.id = OVERLAY_CONFIG.id;
+
+            // Create Shadow DOM to isolate styles
+            const shadow = host.attachShadow({ mode: 'open' });
+
+            // Create Container
             const overlay = document.createElement('div');
-            overlay.id = OVERLAY_CONFIG.id;
             overlay.textContent = text;
 
             applyOverlayStyles(overlay, settings);
 
-            return overlay;
+            // Ensure Host sits on top of everything
+            host.style.position = 'fixed';
+            host.style.zIndex = OVERLAY_CONFIG.zIndex;
+            host.style.left = '0';
+            host.style.top = '0';
+
+            shadow.appendChild(overlay);
+            return host;
         }
 
         function applyOverlayStyles(overlay, settings) {
